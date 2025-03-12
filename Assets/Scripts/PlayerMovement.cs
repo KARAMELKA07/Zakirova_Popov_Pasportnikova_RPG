@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -7,6 +8,9 @@ public class PlayerMovement : MonoBehaviour
     private float currentSpeed;
     private CharacterController characterController;
     private Animator animator;
+    public Image magicCooldownImage;
+    public float magicCooldown = 10f;
+    private float magicCooldownTimer = 10f;
 
     public float turnSpeed = 100f; // Скорость поворота персонажа (градусы в секунду)
 
@@ -37,20 +41,46 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        HandleMagicCooldown();
         HandleAttacks();
-        UpdateAttackTimers(); // Обновляем таймеры атак
-        UpdatePostAttackCooldown(); // Обновляем таймер задержки после атаки
+        UpdateAttackTimers();
+        UpdatePostAttackCooldown();
 
-        // Если персонаж не атакует и задержка после атаки завершена, разрешаем движение
         if (!IsAttacking() && postAttackCooldown <= 0)
         {
             MovePlayer();
         }
         else
         {
-            // Во время атаки или задержки принудительно включаем анимацию idle
             ForceIdle();
         }
+        if (Input.GetMouseButtonDown(1) && magicCooldownTimer <= 0)
+        {
+            CastMagic();
+        }
+    }
+
+    void HandleMagicCooldown()
+    {
+        if (magicCooldownTimer > 0)
+        {
+            magicCooldownTimer -= Time.deltaTime;
+            magicCooldownImage.fillAmount = 1 - (magicCooldownTimer / magicCooldown);
+        }
+    }
+
+// Исправленный метод магической атаки
+    void CastMagic()
+    {
+        if (magicCooldownTimer > 0) return; // Блокируем каст, если кулдаун еще идет
+
+        animator.SetBool("IsMagicAttacking", true);
+        magicCooldownTimer = magicCooldown; // Устанавливаем кулдаун
+        magicCooldownImage.fillAmount = 0; // Обновляем индикатор
+    }
+    void FinishMagicAttack()
+    {
+        animator.SetBool("IsMagicAttacking", false);
     }
 
     void MovePlayer()
@@ -187,6 +217,7 @@ public class PlayerMovement : MonoBehaviour
     // Проверка, атакует ли персонаж
     bool IsAttacking()
     {
-        return animator.GetBool("IsAttacking") || animator.GetBool("IsMagicAttacking");
+        return animator.GetBool("IsAttacking") || animator.GetBool("IsMagicAttacking") || magicCooldownTimer > 0;
     }
+
 }

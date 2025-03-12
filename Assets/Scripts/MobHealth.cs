@@ -17,8 +17,13 @@ public class MobHealth : MonoBehaviour
 
         if (currentHP <= 0)
         {
+            currentHP = 0;
             Die();
         }
+    }
+    public int GetCurrentHP()
+    {
+        return currentHP;
     }
 
     void Die()
