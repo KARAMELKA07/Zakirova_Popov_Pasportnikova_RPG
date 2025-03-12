@@ -39,5 +39,6 @@ public class MobSpawner : MonoBehaviour
     {
         GameObject enemy = Instantiate(enemyPrefab, spawnPoint.position, Quaternion.identity);
         spawnedEnemies.Add(enemy);
+        MobManager.Instance.RegisterMob(enemy);
     }
 }
