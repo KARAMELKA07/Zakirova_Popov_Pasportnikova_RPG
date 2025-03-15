@@ -3,11 +3,11 @@ using UnityEngine.AI;
 
 public class MeleeEnemyAI : MonoBehaviour
 {
-    public float detectionRadius = 10f;  
-    public float attackRadius = 1.5f; 
-    public float forgetRadius = 15f;    
-    public float attackCooldown = 2f;   
-    public int attackDamage = 35;     
+    public float detectionRadius = 10f;
+    public float attackRadius = 1.5f;
+    public float forgetRadius = 15f;
+    public float attackCooldown = 2f;
+    public int attackDamage = 35;
 
     private NavMeshAgent agent;
     private Transform player;
@@ -39,11 +39,11 @@ public class MeleeEnemyAI : MonoBehaviour
 
     void AttackPlayer()
     {
-        if (Time.time - lastAttackTime >= attackCooldown)
+        // Проверка, что у игрока есть здоровье больше 0
+        if (Time.time - lastAttackTime >= attackCooldown && player.GetComponent<PlayerHealth>().GetCurrentHP() > 0)
         {
             lastAttackTime = Time.time;
-            Debug.Log("Зомби атакует игрока!");
-            player.GetComponent<PlayerHealth>().TakeDamage(attackDamage); // Наносим урон
+            player.GetComponent<PlayerHealth>().TakeDamage(attackDamage);
         }
     }
 }

@@ -47,15 +47,32 @@ public class RangedEnemyAI : MonoBehaviour
 
     void AttackPlayer()
     {
-        if (Time.time - lastAttackTime >= attackCooldown)
+        if (Time.time - lastAttackTime >= attackCooldown && player != null)
         {
             lastAttackTime = Time.time;
             Debug.Log("Маг атакует!");
 
-            // Создаем снаряд
-            GameObject projectile = Instantiate(magicProjectilePrefab, firePoint.position, Quaternion.identity);
+            // Получаем позицию игрока в момент выстрела
+            Vector3 targetPosition = player.position;
+
+            // Создаем снаряд и настраиваем направление
+            GameObject projectile = Instantiate(
+                magicProjectilePrefab,
+                firePoint.position,
+                Quaternion.identity
+            );
+
+            // Получаем компонент снаряда и задаем направление
             MagicProjectile magicScript = projectile.GetComponent<MagicProjectile>();
-            magicScript.SetTarget(player);
+            if (magicScript != null)
+            {
+                // Передаем целевую позицию (куда целился маг в момент выстрела)
+                magicScript.SetDirection(targetPosition);
+            }
+            else
+            {
+                Debug.LogError("У снаряда отсутствует компонент MagicProjectile!");
+            }
         }
     }
 }

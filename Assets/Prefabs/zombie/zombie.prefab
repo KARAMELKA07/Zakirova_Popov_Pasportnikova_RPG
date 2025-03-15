@@ -717,7 +717,7 @@ MonoBehaviour:
   detectionRadius: 10
   attackRadius: 1.5
   forgetRadius: 15
-  attackCooldown: 2
+  attackCooldown: 3
   attackDamage: 35
 --- !u!195 &4110288741487086330
 NavMeshAgent:

@@ -1,223 +1,182 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
+using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float walkSpeed = 5f;
-    public float runSpeed = 10f;
-    private float currentSpeed;
-    private CharacterController characterController;
-    private Animator animator;
-    public Image magicCooldownImage;
-    public float magicCooldown = 10f;
-    private float magicCooldownTimer = 10f;
+    [Header("Movement Settings")]
+    public CharacterController controller;
+    public Transform cameraTransform;
+    public float walkSpeed = 2f;
+    public float runSpeed = 6f;
+    public float turnSmoothTime = 0.1f;
 
-    public float turnSpeed = 100f; // Скорость поворота персонажа (градусы в секунду)
+    [Header("Magic Attack")]
+    public float magicAttackCooldown = 5f;
+    public Animator animator;
+    public GameObject magicSphere;
+    public Transform magicSphereStartPos;
+    public float sphereAnimationDuration = 1.5f;
 
-    // Таймеры для анимаций атаки
-    private float attackTimer = 0f;
-    private float magicAttackTimer = 0f;
-    public float attackDuration = 1f; // Длительность анимации атаки мечом
-    public float magicAttackDuration = 1.5f; // Длительность анимации магической атаки
-
-    // Таймер для задержки после атаки
-    private float postAttackCooldown = 0f;
-    public float postAttackDelay = 2f; // Задержка после атаки (2 секунды)
-
-    // Ссылка на шар (дочерний объект)
-    public GameObject magicSphere; // Перетащите сюда ваш шар из инспектора
-
-    void Start()
-    {
-        characterController = GetComponent<CharacterController>();
-        animator = GetComponent<Animator>(); // Подключаем Animator
-
-        // Убедимся, что шар изначально неактивен
-        if (magicSphere != null)
-        {
-            magicSphere.SetActive(false);
-        }
-    }
+    private float turnSmoothVelocity;
+    private bool isAttacking;
+    private float magicCooldownTimer;
+    private bool isMagicOnCooldown;
+    private bool isDead = false;
+    private bool isSphereActive = false;
 
     void Update()
     {
-        HandleMagicCooldown();
-        HandleAttacks();
-        UpdateAttackTimers();
-        UpdatePostAttackCooldown();
+        if (isDead) return;
 
-        if (!IsAttacking() && postAttackCooldown <= 0)
+        AnimatorStateInfo stateInfo = animator.GetCurrentAnimatorStateInfo(0);
+        isAttacking = stateInfo.IsTag("Attack");
+        bool isTakingDamage = stateInfo.IsTag("Damage");
+
+        if (isAttacking || isTakingDamage)
         {
-            MovePlayer();
+            ResetMovement();
+            return;
         }
-        else
-        {
-            ForceIdle();
-        }
-        if (Input.GetMouseButtonDown(1) && magicCooldownTimer <= 0)
-        {
-            CastMagic();
-        }
+
+        UpdateMagicCooldown();
+        HandleAttacks();
+        HandleMovement();
     }
 
-    void HandleMagicCooldown()
+    void ResetMovement()
     {
-        if (magicCooldownTimer > 0)
+        controller.Move(Vector3.zero);
+        animator.SetBool("IsWalking", false);
+        animator.SetBool("IsRunning", false);
+        animator.SetFloat("Speed", 0f);
+    }
+
+    void UpdateMagicCooldown()
+    {
+        if (isMagicOnCooldown)
         {
             magicCooldownTimer -= Time.deltaTime;
-            magicCooldownImage.fillAmount = 1 - (magicCooldownTimer / magicCooldown);
-        }
-    }
-
-// Исправленный метод магической атаки
-    void CastMagic()
-    {
-        if (magicCooldownTimer > 0) return; // Блокируем каст, если кулдаун еще идет
-
-        animator.SetBool("IsMagicAttacking", true);
-        magicCooldownTimer = magicCooldown; // Устанавливаем кулдаун
-        magicCooldownImage.fillAmount = 0; // Обновляем индикатор
-    }
-    void FinishMagicAttack()
-    {
-        animator.SetBool("IsMagicAttacking", false);
-    }
-
-    void MovePlayer()
-    {
-        // Получаем входные данные для движения
-        float moveX = Input.GetAxis("Horizontal");
-        float moveZ = Input.GetAxis("Vertical");
-
-        // Направление движения (пока что только вперед или назад)
-        Vector3 moveDirection = transform.forward * moveZ;
-
-        // Проверка, движется ли персонаж
-        bool isMoving = moveDirection.magnitude > 0.1f;
-
-        // Проверяем, удерживается ли Shift для бега
-        currentSpeed = Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
-
-        // Поворот персонажа на месте
-        if (moveX > 0) // Двигаемся вправо
-        {
-            transform.Rotate(Vector3.up, turnSpeed * Time.deltaTime); // Поворот вправо
-        }
-        else if (moveX < 0) // Двигаемся влево
-        {
-            transform.Rotate(Vector3.up, -turnSpeed * Time.deltaTime); // Поворот влево
-        }
-
-        // Двигаем персонажа по направлению, куда он смотрит
-        if (isMoving)
-        {
-            characterController.Move(moveDirection.normalized * currentSpeed * Time.deltaTime);
-        }
-
-        // Передаем информацию в Animator
-        animator.SetFloat("Speed", isMoving ? currentSpeed : 0); // Устанавливаем скорость
-
-        // Устанавливаем параметры для анимации
-        if (isMoving)
-        {
-            if (Input.GetKey(KeyCode.LeftShift)) // Если зажат Shift, то бегаем
+            if (magicCooldownTimer <= 0f)
             {
-                animator.SetBool("IsRunning", true);
-                animator.SetBool("IsWalking", false); // Останавливаем ходьбу
+                isMagicOnCooldown = false;
             }
-            else // Если Shift не зажат, то просто идем
-            {
-                animator.SetBool("IsRunning", false);
-                animator.SetBool("IsWalking", true); // Включаем ходьбу
-            }
-        }
-        else
-        {
-            animator.SetBool("IsRunning", false); // Останавливаем бег
-            animator.SetBool("IsWalking", false); // Останавливаем ходьбу
         }
     }
 
     void HandleAttacks()
     {
-        // Левая кнопка мыши - атака мечом
-        if (Input.GetMouseButtonDown(0) && attackTimer <= 0) // 0 - левая кнопка мыши
+        if (Input.GetMouseButtonDown(0))
         {
-            animator.SetBool("IsAttacking", true);
-            attackTimer = attackDuration; // Запускаем таймер атаки
+            TriggerMeleeAttack();
         }
-
-        // Правая кнопка мыши - магическая атака
-        if (Input.GetMouseButtonDown(1) && magicAttackTimer <= 0) // 1 - правая кнопка мыши
+        else if (Input.GetMouseButtonDown(1) && !isMagicOnCooldown && !isSphereActive)
         {
-            animator.SetBool("IsMagicAttacking", true);
-            magicAttackTimer = magicAttackDuration; // Запускаем таймер магической атаки
-
-            // Активируем шар и запускаем его анимацию
-            if (magicSphere != null)
-            {
-                magicSphere.SetActive(true); // Активируем шар
-                Animation sphereAnimation = magicSphere.GetComponent<Animation>();
-                if (sphereAnimation != null)
-                {
-                    sphereAnimation.Play(); // Запускаем анимацию шара
-                }
-            }
+            TriggerMagicAttack();
         }
     }
 
-    void UpdateAttackTimers()
+    void TriggerMeleeAttack()
     {
-        // Обновляем таймер атаки мечом
-        if (attackTimer > 0)
+        animator.SetTrigger("Attack");
+        controller.Move(Vector3.zero);
+    }
+
+    void TriggerMagicAttack()
+    {
+        animator.SetTrigger("MagicAttack");
+        controller.Move(Vector3.zero);
+        isMagicOnCooldown = true;
+        magicCooldownTimer = magicAttackCooldown;
+
+        StartCoroutine(HandleMagicSphere());
+    }
+
+    IEnumerator HandleMagicSphere()
+    {
+        isSphereActive = true;
+
+        // Сброс позиции и активация сферы
+        magicSphere.transform.position = magicSphereStartPos.position;
+        magicSphere.SetActive(true);
+
+        // Запуск анимации
+        Animator sphereAnimator = magicSphere.GetComponent<Animator>();
+        if (sphereAnimator != null)
         {
-            attackTimer -= Time.deltaTime;
-            if (attackTimer <= 0)
-            {
-                animator.SetBool("IsAttacking", false); // Сбрасываем атаку
-                postAttackCooldown = postAttackDelay; // Запускаем задержку после атаки
-            }
+            sphereAnimator.Play("MagicSphereAnimation", 0, 0f);
         }
 
-        // Обновляем таймер магической атаки
-        if (magicAttackTimer > 0)
-        {
-            magicAttackTimer -= Time.deltaTime;
-            if (magicAttackTimer <= 0)
-            {
-                animator.SetBool("IsMagicAttacking", false); // Сбрасываем магическую атаку
-                postAttackCooldown = postAttackDelay; // Запускаем задержку после атаки
+        // Ожидание завершения анимации
+        yield return new WaitForSeconds(sphereAnimationDuration);
 
-                // Деактивируем шар после завершения анимации
-                if (magicSphere != null)
-                {
-                    magicSphere.SetActive(false);
-                }
-            }
+        // Деактивация сферы
+        magicSphere.SetActive(false);
+        isSphereActive = false;
+    }
+
+    // Остальные методы остаются без изменений
+    void HandleMovement()
+    {
+        Vector2 input = new Vector2(
+            Input.GetAxis("Horizontal"),
+            Input.GetAxis("Vertical")
+        );
+        Vector3 direction = new Vector3(input.x, 0f, input.y).normalized;
+
+        UpdateAnimations(direction);
+
+        if (direction.magnitude >= 0.1f)
+        {
+            RotateCharacter(direction);
+            MoveCharacter(direction);
         }
     }
 
-    void UpdatePostAttackCooldown()
+    void UpdateAnimations(Vector3 direction)
     {
-        // Обновляем таймер задержки после атаки
-        if (postAttackCooldown > 0)
-        {
-            postAttackCooldown -= Time.deltaTime;
-        }
+        bool isRunning = Input.GetKey(KeyCode.LeftShift);
+        bool hasInput = direction.magnitude >= 0.1f;
+
+        animator.SetBool("IsRunning", isRunning && hasInput);
+        animator.SetBool("IsWalking", hasInput && !isRunning);
+        animator.SetFloat("Speed", hasInput ? (isRunning ? runSpeed : walkSpeed) : 0f);
     }
 
-    // Принудительно включаем анимацию idle
-    void ForceIdle()
+    void RotateCharacter(Vector3 direction)
     {
-        animator.SetBool("IsRunning", false);
-        animator.SetBool("IsWalking", false);
-        animator.SetFloat("Speed", 0); // Устанавливаем скорость в 0
+        float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
+        float smoothedAngle = Mathf.SmoothDampAngle(
+            transform.eulerAngles.y,
+            targetAngle,
+            ref turnSmoothVelocity,
+            turnSmoothTime
+        );
+        transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
     }
 
-    // Проверка, атакует ли персонаж
-    bool IsAttacking()
+    void MoveCharacter(Vector3 direction)
     {
-        return animator.GetBool("IsAttacking") || animator.GetBool("IsMagicAttacking") || magicCooldownTimer > 0;
+        float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
+        Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+        controller.Move(moveDir.normalized * (Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed) * Time.deltaTime);
     }
 
+    public void Die()
+    {
+        isDead = true;
+        animator.SetTrigger("Die");
+        controller.Move(Vector3.zero);
+    }
+
+    public float GetCooldownProgress()
+    {
+        return isMagicOnCooldown ?
+            1 - (magicCooldownTimer / magicAttackCooldown) :
+            1f;
+    }
+
+    public bool IsMagicReady()
+    {
+        return !isMagicOnCooldown;
+    }
 }
