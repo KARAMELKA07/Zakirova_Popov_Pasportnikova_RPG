@@ -6,6 +6,7 @@ public class MagicProjectile : MonoBehaviour
     public int damage = 15;
     private Vector3 flightDirection; // Направление полета
     private float lifetime = 3f; // Время жизни снаряда
+    private PlayerHealth playerHealth;
 
     void Start()
     {
@@ -19,6 +20,14 @@ public class MagicProjectile : MonoBehaviour
             collider.isTrigger = true;
             collider.radius = 0.5f;
         }
+
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+
+        if (playerObject != null)
+        {
+            playerHealth = playerObject.GetComponent<PlayerHealth>();
+        }
+
     }
 
     public void SetDirection(Vector3 targetPosition)
@@ -32,6 +41,11 @@ public class MagicProjectile : MonoBehaviour
 
     void Update()
     {
+        if (playerHealth == null || playerHealth.GetCurrentHP() <= 0)
+        {
+            Destroy(gameObject);
+            return; 
+        }
         // Движение в заданном направлении
         transform.position += flightDirection * speed * Time.deltaTime;
     }

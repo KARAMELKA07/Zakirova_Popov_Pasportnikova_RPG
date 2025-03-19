@@ -4,10 +4,14 @@ public class MobHealth : MonoBehaviour
 {
     public int maxHP = 50;
     private int currentHP;
+    private MeleeEnemyAI meleeEnemyAI;
+    private RangedEnemyAI rangedEnemyAI;
 
     void Start()
     {
         currentHP = maxHP;
+        meleeEnemyAI = GetComponent<MeleeEnemyAI>();
+        rangedEnemyAI = GetComponent<RangedEnemyAI>();
     }
 
     public void TakeDamage(int damage)
@@ -21,6 +25,7 @@ public class MobHealth : MonoBehaviour
             Die();
         }
     }
+
     public int GetCurrentHP()
     {
         return currentHP;
@@ -29,6 +34,16 @@ public class MobHealth : MonoBehaviour
     void Die()
     {
         Debug.Log($"{gameObject.name} помер(");
+
+        if (meleeEnemyAI != null)
+        {
+            meleeEnemyAI.Die();
+        }
+        else if (rangedEnemyAI != null)
+        {
+            rangedEnemyAI.Die();
+        }
+
         MobManager.Instance.UnregisterMob(gameObject);
     }
 }
