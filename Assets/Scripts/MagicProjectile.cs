@@ -4,16 +4,14 @@ public class MagicProjectile : MonoBehaviour
 {
     public float speed = 10f;
     public int damage = 15;
-    private Vector3 flightDirection; // Направление полета
-    private float lifetime = 3f; // Время жизни снаряда
+    private Vector3 flightDirection; 
+    private float lifetime = 3f; 
     private PlayerHealth playerHealth;
 
     void Start()
     {
-        // Уничтожаем объект через заданное время
         Destroy(gameObject, lifetime);
 
-        // Добавляем коллайдер (если еще не добавлен)
         if (!GetComponent<Collider>())
         {
             SphereCollider collider = gameObject.AddComponent<SphereCollider>();
@@ -32,10 +30,8 @@ public class MagicProjectile : MonoBehaviour
 
     public void SetDirection(Vector3 targetPosition)
     {
-        // Рассчитываем начальное направление
         flightDirection = (targetPosition - transform.position).normalized;
 
-        // Поворачиваем снаряд в направлении полета
         transform.rotation = Quaternion.LookRotation(flightDirection);
     }
 
@@ -46,13 +42,11 @@ public class MagicProjectile : MonoBehaviour
             Destroy(gameObject);
             return; 
         }
-        // Движение в заданном направлении
         transform.position += flightDirection * speed * Time.deltaTime;
     }
 
     void OnTriggerEnter(Collider other)
     {
-        // Проверяем столкновение с игроком
         if (other.CompareTag("Player"))
         {
             PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
@@ -63,8 +57,7 @@ public class MagicProjectile : MonoBehaviour
             Destroy(gameObject);
         }
 
-        // Дополнительная логика при столкновении с другими объектами
-        if (!other.CompareTag("Enemy")) // Не уничтожаем при столкновении с врагами
+        if (!other.CompareTag("Enemy")) 
         {
             Destroy(gameObject);
         }

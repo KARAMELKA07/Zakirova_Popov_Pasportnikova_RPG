@@ -26,18 +26,14 @@ public class PlayerUI : MonoBehaviour
 
     void UpdateMagicCooldown()
     {
-        // Обновление заполнения
         magicCooldownImage.fillAmount = playerMovement.GetCooldownProgress();
 
-        // Управление видимостью
         if (playerMovement.IsMagicReady())
         {
-            // Полная видимость + эффект готовности
             magicCooldownImage.color = Color.white;
         }
         else
         {
-            // Полупрозрачность во время перезарядки
             magicCooldownImage.color = new Color(1, 1, 1, 0.4f);
         }
     }

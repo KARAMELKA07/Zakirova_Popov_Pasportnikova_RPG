@@ -95,26 +95,21 @@ public class PlayerMovement : MonoBehaviour
     {
         isSphereActive = true;
 
-        // Сброс позиции и активация сферы
         magicSphere.transform.position = magicSphereStartPos.position;
         magicSphere.SetActive(true);
 
-        // Запуск анимации
         Animator sphereAnimator = magicSphere.GetComponent<Animator>();
         if (sphereAnimator != null)
         {
             sphereAnimator.Play("MagicSphereAnimation", 0, 0f);
         }
 
-        // Ожидание завершения анимации
         yield return new WaitForSeconds(sphereAnimationDuration);
 
-        // Деактивация сферы
         magicSphere.SetActive(false);
         isSphereActive = false;
     }
 
-    // Остальные методы остаются без изменений
     void HandleMovement()
     {
         Vector2 input = new Vector2(

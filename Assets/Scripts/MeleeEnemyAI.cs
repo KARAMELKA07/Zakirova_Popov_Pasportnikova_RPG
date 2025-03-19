@@ -33,12 +33,12 @@ public class MeleeEnemyAI : MonoBehaviour
 
     void Update()
     {
-        if (isDead) return; // Если враг мертв, он не двигается и не атакует
+        if (isDead) return; 
         if (playerHealth == null || playerHealth.GetCurrentHP() <= 0)
         {
             StopChasing();
             animator.SetFloat("Speed", 0);
-            return; // Если игрок мертв, враг просто стоит
+            return; 
         }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -56,7 +56,6 @@ public class MeleeEnemyAI : MonoBehaviour
             StopChasing();
         }
 
-        // Обновляем параметр Speed в аниматоре, но используем desiredVelocity
         float speed = agent.desiredVelocity.magnitude;
         animator.SetFloat("Speed", speed);
     }
@@ -82,9 +81,9 @@ public class MeleeEnemyAI : MonoBehaviour
         {
             lastAttackTime = Time.time;
             Vector3 direction = (player.position - transform.position).normalized;
-            direction.y = 0; // Убираем наклон по оси Y
+            direction.y = 0; 
             transform.rotation = Quaternion.LookRotation(direction);
-            animator.SetTrigger("attack"); // Запускаем анимацию атаки
+            animator.SetTrigger("attack"); 
             StartCoroutine(PerformAttack());
         }
     }
@@ -93,7 +92,7 @@ public class MeleeEnemyAI : MonoBehaviour
     {
         yield return new WaitForSeconds(attackDelay);
 
-        if (isDead) yield break; // Прерываем, если враг умер
+        if (isDead) yield break; 
 
         if (player != null && Vector3.Distance(transform.position, player.position) <= attackRadius)
         {
@@ -107,10 +106,9 @@ public class MeleeEnemyAI : MonoBehaviour
         isDead = true;
 
         GetComponent<NavMeshAgent>().enabled = false;
-        animator.SetTrigger("Die"); // Запускаем анимацию смерти
+        animator.SetTrigger("Die"); 
 
-        // Удаляем объект через несколько секунд после окончания анимации смерти
-        Destroy(gameObject, 3f); // Задержка на 3 секунды для анимации смерти
+        Destroy(gameObject, 3f); 
     }
 
     

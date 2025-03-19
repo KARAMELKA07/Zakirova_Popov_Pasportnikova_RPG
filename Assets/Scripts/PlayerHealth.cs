@@ -9,13 +9,13 @@ public class PlayerHealth : MonoBehaviour
     private int currentHP;
     private Animator animator;
 
-    public GameObject gameOverPanel; // Панель "Game Over"
+    public GameObject gameOverPanel; 
     public Text gameOverText;
 
     void Start()
     {
         currentHP = maxHP;
-        gameOverPanel.SetActive(false); // Скрываем при старте
+        gameOverPanel.SetActive(false); 
         animator = GetComponent<Animator>();
     }
 
@@ -33,23 +33,18 @@ public class PlayerHealth : MonoBehaviour
         if (currentHP <= 0)
         {
             currentHP = 0;
-            animator.SetBool("IsDead", true); // Устанавливаем флаг для анимации смерти
+            animator.SetBool("IsDead", true); 
 
-            // Запускаем корутину для задержки перед смертью
             StartCoroutine(DeathSequence());
         }
     }
 
-    // Корутину для задержки перед смертью
     private IEnumerator DeathSequence()
     {
-        // Задержка на время анимации смерти (например, 2 секунды)
         yield return new WaitForSeconds(2f);
 
-        // Останавливаем движение и анимацию
         animator.SetTrigger("Die");
 
-        // Появление панели "Game Over"
         Die();
     }
 

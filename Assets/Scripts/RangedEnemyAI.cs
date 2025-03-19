@@ -25,7 +25,7 @@ public class RangedEnemyAI : MonoBehaviour
 
     void Update()
     {
-        if (isDead) return; // Если враг мертв, он не выполняет никаких действий
+        if (isDead) return; 
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         animator.SetFloat("Speed", agent.velocity.magnitude);
@@ -55,16 +55,15 @@ public class RangedEnemyAI : MonoBehaviour
         if (isDead || Time.time - lastAttackTime < attackCooldown || player == null) return;
 
         lastAttackTime = Time.time;
-        agent.SetDestination(transform.position); // Останавливаем движение
+        agent.SetDestination(transform.position); 
 
-        // Поворачиваем мага в сторону игрока
         Vector3 direction = (player.position - transform.position).normalized;
-        direction.y = 0; // Убираем наклон по оси Y
+        direction.y = 0; 
         transform.rotation = Quaternion.LookRotation(direction);
 
-        animator.SetTrigger("attack"); // Запускаем анимацию атаки
+        animator.SetTrigger("attack"); 
 
-        Invoke("Shoot", 0.5f); // Добавляем небольшую задержку перед выстрелом
+        Invoke("Shoot", 0.5f); 
     }
 
     void Shoot()
@@ -91,9 +90,9 @@ public class RangedEnemyAI : MonoBehaviour
 
         isDead = true;
         Debug.Log($"{gameObject.name} умер.");
-        animator.SetTrigger("die"); // Запускаем анимацию смерти
-        agent.isStopped = true; // Останавливаем передвижение
-        agent.enabled = false; // Отключаем NavMeshAgent
-        Destroy(gameObject, 3f); // Удаляем объект после задержки
+        animator.SetTrigger("die"); 
+        agent.isStopped = true; 
+        agent.enabled = false; 
+        Destroy(gameObject, 3f); 
     }
 }

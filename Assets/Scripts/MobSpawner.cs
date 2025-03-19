@@ -24,7 +24,7 @@ public class MobSpawner : MonoBehaviour
     {
         for (int i = 0; i < maxMeleeEnemies; i++)
         {
-            Transform spawnPoint = meleeSpawnPoints[i % meleeSpawnPoints.Length]; // Берем по очереди точки
+            Transform spawnPoint = meleeSpawnPoints[i % meleeSpawnPoints.Length]; 
             SpawnEnemy(meleeEnemyPrefab, spawnPoint);
         }
 

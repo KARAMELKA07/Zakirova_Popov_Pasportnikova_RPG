@@ -18,7 +18,6 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
-    // Вызывается в анимации атаки мечом
     public void DealSwordDamage()
     {
         Collider[] hitEnemies = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
@@ -34,7 +33,6 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
-    // Вызывается в анимации магической атаки
     public void DealMagicDamage()
     {
         Collider[] hitEnemies = Physics.OverlapSphere(transform.position, magicRange, enemyLayer);
