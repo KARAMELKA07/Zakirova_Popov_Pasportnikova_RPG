@@ -2,10 +2,12 @@
 
 public class MainMenuBootstrapper : MonoBehaviour
 {
-    public MainMenuView view;
+    public MainMenuView mainMenuView;
+    public SettingsMenuView settingsMenuView;
 
     void Start()
     {
-        new MainMenuController(view);
+        GameBootstrapper.Instance.AudioService.PlayMusic("music");
+        new MainMenuController(mainMenuView, settingsMenuView);
     }
 }
