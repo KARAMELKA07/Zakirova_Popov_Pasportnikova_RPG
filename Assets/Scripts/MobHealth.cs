@@ -46,4 +46,9 @@ public class MobHealth : MonoBehaviour
 
         MobManager.Instance.UnregisterMob(gameObject);
     }
+    public void ForceSetHP(int hp)
+    {
+        currentHP = Mathf.Clamp(hp, 0, maxHP);
+    }
+
 }

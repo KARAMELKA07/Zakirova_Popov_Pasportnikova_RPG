@@ -55,6 +55,12 @@ public class PlayerHealth : MonoBehaviour
         gameOverPanel.SetActive(true);
         gameOverText.text = "Game Over!";
     }
+    
+    public void ForceSetHP(int hp)
+    {
+        currentHP = Mathf.Clamp(hp, 0, maxHP);
+    }
+
 
     public void RestartGame()
     {
