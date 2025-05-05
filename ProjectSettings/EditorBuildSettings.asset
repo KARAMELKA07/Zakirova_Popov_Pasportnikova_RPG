@@ -10,5 +10,8 @@ EditorBuildSettings:
     guid: af1ac24a66798b442a7119a803e41898
   - enabled: 1
     path: Assets/Scenes/Gameplay.unity
+    guid: 516122db7599b364f9dfd38c2c6a9a07
+  - enabled: 0
+    path: Assets/Advance Studios/Medieval Castle/Scenes/SampleScene.unity
     guid: 4e0b2b51b6662be4f9d98e95645aff16
   m_configObjects: {}

@@ -36,6 +36,7 @@ public class MainMenuController
 
     private void OnPlayClicked()
     {
+        Debug.Log("lol");
         GameBootstrapper.Instance.GameStateService.LoadScene("Gameplay");
     }
     
