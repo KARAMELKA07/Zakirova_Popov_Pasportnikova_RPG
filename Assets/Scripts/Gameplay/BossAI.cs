@@ -12,7 +12,11 @@ public class BossAI : MonoBehaviour
     [Header("State Settings")]
     public BossState currentState = BossState.Idle;
     public bool isPeaceful = false;
-    public float stateChangeInterval = 10f;
+    public float elementChangeInterval = 15f;
+
+    [Header("Movement Settings")]
+    public float normalSpeed = 2f;
+    public float chaseSpeed = 2f;
 
     [Header("Combat Settings")]
     public float detectionRadius = 10f;
@@ -26,8 +30,8 @@ public class BossAI : MonoBehaviour
     public int strongAttackDamage = 40;
 
     [Header("Ranged Attack Settings")]
-    public float minRangedAttackDistance = 10f;
-    public float maxRangedAttackDistance = 25f;
+    public float minRangedAttackDistance = 11f;
+    public float maxRangedAttackDistance = 20f;
 
     [Header("References")]
     public GameObject projectilePrefab;
@@ -68,13 +72,14 @@ public class BossAI : MonoBehaviour
 
         agent.acceleration = 8f;
         agent.angularSpeed = 120f;
+        agent.speed = normalSpeed;
     }
 
     void Update()
     {
         if (isDead) return;
 
-        if (Time.time - lastElementChangeTime >= stateChangeInterval)
+        if (Time.time - lastElementChangeTime >= elementChangeInterval)
         {
             ChangeElement(GetNextElement());
             lastElementChangeTime = Time.time;
@@ -99,6 +104,7 @@ public class BossAI : MonoBehaviour
         if (distanceToPlayer > detectionRadius)
         {
             currentState = BossState.Idle;
+            agent.speed = normalSpeed;
             return;
         }
 
@@ -119,6 +125,7 @@ public class BossAI : MonoBehaviour
         else
         {
             currentState = BossState.Aggro;
+            agent.speed = chaseSpeed;
         }
     }
 
@@ -248,13 +255,17 @@ public class BossAI : MonoBehaviour
 
     protected virtual IEnumerator PerformRangedAttack()
     {
-        yield return new WaitForSeconds(0.5f);
+        // Ждем начала анимации
+        yield return new WaitForSeconds(0.1f);
         if (isDead) yield break;
 
+        // Проигрываем эффекты и звуки
         PlayElementEffect();
         PlayWeaponSound(false);
         SpawnProjectile();
-        yield return new WaitForSeconds(1.5f - 0.5f);
+
+        // Ждем окончания анимации
+        yield return new WaitForSeconds(1.4f);
         ReturnToPreviousState();
     }
 
@@ -275,7 +286,14 @@ public class BossAI : MonoBehaviour
 
     protected virtual IEnumerator PerformSpecialAbility1()
     {
-        yield return new WaitForSeconds(2.5f);
+        // Ждем пока анимация Special1 начнется
+        yield return new WaitForSeconds(0.1f);
+
+        // Ждем завершения анимации
+        yield return new WaitForSeconds(2.4f);
+
+        // Сбрасываем триггер и возвращаемся в Idle
+        animator.ResetTrigger("Special1");
         currentState = BossState.Idle;
     }
 
@@ -320,8 +338,9 @@ public class BossAI : MonoBehaviour
     protected void ChangeElement(Element newElement)
     {
         currentElement = newElement;
-        currentState = BossState.SpecialAbility1;
+        audioSource.PlayOneShot(laughSound);
         PlayElementChangeSound();
+        currentState = BossState.SpecialAbility1;
     }
 
     protected void PlayElementEffect()

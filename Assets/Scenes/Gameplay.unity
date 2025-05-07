@@ -1751,32 +1751,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentState: 0
   isPeaceful: 0
-  stateChangeInterval: 10
-  detectionRadius: 15
-  attackRadius: 5
-  strongAttackRadius: 3
+  elementChangeInterval: 15
+  normalSpeed: 3.5
+  chaseSpeed: 2
+  detectionRadius: 10
+  attackRadius: 3
+  strongAttackRadius: 2
   fleeHealthThreshold: 0.2
-  attackCooldown: 2
-  strongAttackCooldown: 5
+  attackCooldown: 7
+  strongAttackCooldown: 10
   meleeDamage: 30
   rangedDamage: 20
-  strongAttackDamage: 50
-  etherBackwardChance: 30
-  currentElement: 0
-  currentWeapon: 0
+  strongAttackDamage: 40
+  minRangedAttackDistance: 11
+  maxRangedAttackDistance: 20
   projectilePrefab: {fileID: 0}
   firePoint: {fileID: 0}
-  meleeAttackAnimLength: 1.2
-  rangedAttackAnimLength: 1.5
-  strongAttackAnimLength: 2
-  special1AnimLength: 2.5
-  special2AnimLength: 3
-  dieAnimLength: 3
   elementEffects: []
   meleeSounds: []
   rangedSounds: []
   elementChangeSounds: []
-  laughSound: {fileID: 0}
+  laughSound: {fileID: 8300000, guid: aeb2809dd624ed34c967736d5ef8d83e, type: 3}
 --- !u!82 &368450006
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1873,6 +1868,41 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!195 &368450007
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 368450002}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &368450008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 368450002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4f789e27a6f4eb4ab409d8c24f4b2f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHP: 150
 --- !u!1001 &407882661
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2376,11 +2406,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3146711433171987099, guid: af8d0a12de7b28b41b708ac01461d7f8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 16.690388
+      value: 19.781
       objectReference: {fileID: 0}
     - target: {fileID: 3146711433171987099, guid: af8d0a12de7b28b41b708ac01461d7f8, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.11000037
+      value: 0.067
       objectReference: {fileID: 0}
     - target: {fileID: 3146711433171987099, guid: af8d0a12de7b28b41b708ac01461d7f8, type: 3}
       propertyPath: m_LocalPosition.z
