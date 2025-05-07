@@ -223,6 +223,16 @@ public class BossAI : MonoBehaviour
         }
     }
 
+    public void SetPeaceful(bool peaceful)
+    {
+        isPeaceful = peaceful;
+        if (!peaceful)
+        {
+            currentState = BossState.Aggro;
+            agent.speed = chaseSpeed;
+        }
+    }
+
     protected virtual void SpecialAbility1State()
     {
         if (!isSpecialAbilityPlaying)
@@ -235,6 +245,7 @@ public class BossAI : MonoBehaviour
             StartCoroutine(PerformSpecialAbility1());
         }
     }
+
 
     protected virtual void FleeState()
     {
