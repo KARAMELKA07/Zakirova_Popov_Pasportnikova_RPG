@@ -2,45 +2,36 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 
-public enum BossState { Idle, Aggro, Attack, StrongAttack, SpecialAbility1, SpecialAbility2, Flee }
+public enum BossState { Idle, Aggro, Attack, StrongAttack, SpecialAbility1, Flee }
 public enum Element { Fire, Ice, Earth, Ether }
 public enum WeaponType { Melee, Ranged }
 
 [RequireComponent(typeof(NavMeshAgent), typeof(Animator), typeof(AudioSource))]
 public class BossAI : MonoBehaviour
 {
-    [Header("State Machine")]
+    [Header("State Settings")]
     public BossState currentState = BossState.Idle;
     public bool isPeaceful = false;
     public float stateChangeInterval = 10f;
 
     [Header("Combat Settings")]
-    public float detectionRadius = 15f;
-    public float attackRadius = 5f;
-    public float strongAttackRadius = 3f;
+    public float detectionRadius = 10f;
+    public float attackRadius = 2f;
+    public float strongAttackRadius = 1f;
     public float fleeHealthThreshold = 0.2f;
-    public float attackCooldown = 2f;
-    public float strongAttackCooldown = 5f;
+    public float attackCooldown = 3f;
+    public float strongAttackCooldown = 7f;
     public int meleeDamage = 30;
     public int rangedDamage = 20;
-    public int strongAttackDamage = 50;
-    [Range(0, 100)] public float etherBackwardChance = 30f;
+    public int strongAttackDamage = 40;
 
-    [Header("Elements & Weapons")]
-    public Element currentElement;
-    public WeaponType currentWeapon;
+    [Header("Ranged Attack Settings")]
+    public float minRangedAttackDistance = 10f;
+    public float maxRangedAttackDistance = 25f;
+
+    [Header("References")]
     public GameObject projectilePrefab;
     public Transform firePoint;
-
-    [Header("Animation Settings")]
-    public float meleeAttackAnimLength = 1.2f;
-    public float rangedAttackAnimLength = 1.5f;
-    public float strongAttackAnimLength = 2f;
-    public float special1AnimLength = 2.5f; // Для смеха
-    public float special2AnimLength = 3f;   // Для ходьбы задом
-    public float dieAnimLength = 3f;
-
-    [Header("Effects")]
     public ParticleSystem[] elementEffects;
     public AudioClip[] meleeSounds;
     public AudioClip[] rangedSounds;
@@ -57,6 +48,9 @@ public class BossAI : MonoBehaviour
     protected float lastAttackTime;
     protected float lastStrongAttackTime;
     protected float lastElementChangeTime;
+    protected bool wasMovingBeforeAttack;
+    protected Element currentElement;
+    protected WeaponType currentWeapon;
 
     void Start()
     {
@@ -72,7 +66,6 @@ public class BossAI : MonoBehaviour
         ChangeElement((Element)Random.Range(0, 4));
         lastElementChangeTime = Time.time;
 
-        // Настройка для ходьбы задом
         agent.acceleration = 8f;
         agent.angularSpeed = 120f;
     }
@@ -102,63 +95,91 @@ public class BossAI : MonoBehaviour
         }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+        if (distanceToPlayer > detectionRadius)
+        {
+            currentState = BossState.Idle;
+            return;
+        }
+
         float healthPercent = (float)mobHealth.GetCurrentHP() / mobHealth.maxHP;
 
         if (healthPercent <= fleeHealthThreshold)
+        {
             currentState = BossState.Flee;
+        }
         else if (distanceToPlayer <= strongAttackRadius && Time.time - lastStrongAttackTime >= strongAttackCooldown)
+        {
             currentState = BossState.StrongAttack;
+        }
         else if (distanceToPlayer <= attackRadius)
+        {
             currentState = BossState.Attack;
-        else if (distanceToPlayer <= detectionRadius)
-            currentState = BossState.Aggro;
+        }
         else
-            currentState = BossState.Idle;
+        {
+            currentState = BossState.Aggro;
+        }
     }
 
     protected virtual void ExecuteState()
     {
         switch (currentState)
         {
-            case BossState.Idle: IdleState(); break;
-            case BossState.Aggro: AggroState(); break;
-            case BossState.Attack: AttackState(); break;
-            case BossState.StrongAttack: StrongAttackState(); break;
-            case BossState.SpecialAbility1: SpecialAbility1State(); break;
-            case BossState.SpecialAbility2: SpecialAbility2State(); break;
-            case BossState.Flee: FleeState(); break;
+            case BossState.Idle:
+                IdleState();
+                break;
+            case BossState.Aggro:
+                AggroState();
+                break;
+            case BossState.Attack:
+                AttackState();
+                break;
+            case BossState.StrongAttack:
+                StrongAttackState();
+                break;
+            case BossState.SpecialAbility1:
+                SpecialAbility1State();
+                break;
+            case BossState.Flee:
+                FleeState();
+                break;
         }
+    }
+
+    protected virtual void AggroState()
+    {
+        float distance = Vector3.Distance(transform.position, player.position);
+        bool inRangedRange = distance >= minRangedAttackDistance && distance <= maxRangedAttackDistance;
+        currentWeapon = inRangedRange ? WeaponType.Ranged : WeaponType.Melee;
+
+        agent.isStopped = false;
+        agent.SetDestination(player.position);
+        animator.SetBool("IsWalking", true);
+        animator.SetFloat("Speed", agent.velocity.magnitude);
     }
 
     protected virtual void IdleState()
     {
         agent.isStopped = true;
+        agent.ResetPath();
         animator.SetBool("IsWalking", false);
-        animator.SetBool("IsWalkingBackwards", false);
-    }
-
-    protected virtual void AggroState()
-    {
-        agent.isStopped = false;
-        agent.SetDestination(player.position);
-        animator.SetBool("IsWalking", true);
-        animator.SetBool("IsWalkingBackwards", false);
-        animator.SetFloat("Speed", agent.velocity.magnitude);
-        currentWeapon = Vector3.Distance(transform.position, player.position) > attackRadius
-            ? WeaponType.Ranged : WeaponType.Melee;
     }
 
     protected virtual void AttackState()
     {
-        if (currentElement == Element.Ether && Random.Range(0, 100) < etherBackwardChance)
+        float distance = Vector3.Distance(transform.position, player.position);
+        bool inRangedRange = distance >= minRangedAttackDistance && distance <= maxRangedAttackDistance;
+
+        if (currentWeapon == WeaponType.Ranged && !inRangedRange)
         {
-            currentState = BossState.SpecialAbility2;
+            currentState = BossState.Aggro;
             return;
         }
 
+        wasMovingBeforeAttack = animator.GetBool("IsWalking");
         agent.isStopped = true;
         animator.SetBool("IsWalking", false);
-        animator.SetBool("IsWalkingBackwards", false);
 
         if (Time.time - lastAttackTime >= attackCooldown)
         {
@@ -170,7 +191,7 @@ public class BossAI : MonoBehaviour
                 animator.SetTrigger("MeleeAttack");
                 StartCoroutine(PerformMeleeAttack());
             }
-            else
+            else if (inRangedRange)
             {
                 animator.SetTrigger("RangedAttack");
                 StartCoroutine(PerformRangedAttack());
@@ -182,7 +203,6 @@ public class BossAI : MonoBehaviour
     {
         agent.isStopped = true;
         animator.SetBool("IsWalking", false);
-        animator.SetBool("IsWalkingBackwards", false);
 
         if (Time.time - lastStrongAttackTime >= strongAttackCooldown)
         {
@@ -195,27 +215,11 @@ public class BossAI : MonoBehaviour
 
     protected virtual void SpecialAbility1State()
     {
-        // Злобный смех при смене стихии
         agent.isStopped = true;
         animator.SetBool("IsWalking", false);
-        animator.SetBool("IsWalkingBackwards", false);
         animator.SetTrigger("Special1");
         audioSource.PlayOneShot(laughSound);
         StartCoroutine(PerformSpecialAbility1());
-    }
-
-    protected virtual void SpecialAbility2State()
-    {
-        // Ходьба задом для эфира
-        if (currentElement == Element.Ether)
-        {
-            agent.isStopped = false;
-            animator.SetBool("IsWalking", false);
-            animator.SetBool("IsWalkingBackwards", true);
-            Vector3 retreatDirection = -transform.forward;
-            agent.SetDestination(transform.position + retreatDirection * 3f);
-            StartCoroutine(PerformSpecialAbility2());
-        }
     }
 
     protected virtual void FleeState()
@@ -224,7 +228,6 @@ public class BossAI : MonoBehaviour
         Vector3 fleeDirection = transform.position - player.position;
         agent.SetDestination(transform.position + fleeDirection.normalized * 10f);
         animator.SetBool("IsWalking", true);
-        animator.SetBool("IsWalkingBackwards", false);
         animator.SetFloat("Speed", agent.velocity.magnitude);
     }
 
@@ -239,7 +242,8 @@ public class BossAI : MonoBehaviour
             PlayElementEffect();
             PlayWeaponSound(true);
         }
-        yield return new WaitForSeconds(meleeAttackAnimLength - 0.3f);
+        yield return new WaitForSeconds(1.2f - 0.3f);
+        ReturnToPreviousState();
     }
 
     protected virtual IEnumerator PerformRangedAttack()
@@ -250,7 +254,8 @@ public class BossAI : MonoBehaviour
         PlayElementEffect();
         PlayWeaponSound(false);
         SpawnProjectile();
-        yield return new WaitForSeconds(rangedAttackAnimLength - 0.5f);
+        yield return new WaitForSeconds(1.5f - 0.5f);
+        ReturnToPreviousState();
     }
 
     protected virtual IEnumerator PerformStrongAttack()
@@ -264,20 +269,21 @@ public class BossAI : MonoBehaviour
             PlayElementEffect();
             PlayWeaponSound(true);
         }
-        yield return new WaitForSeconds(strongAttackAnimLength - 0.8f);
+        yield return new WaitForSeconds(2f - 0.8f);
+        ReturnToPreviousState();
     }
 
     protected virtual IEnumerator PerformSpecialAbility1()
     {
-        yield return new WaitForSeconds(special1AnimLength);
+        yield return new WaitForSeconds(2.5f);
         currentState = BossState.Idle;
     }
 
-    protected virtual IEnumerator PerformSpecialAbility2()
+    protected void ReturnToPreviousState()
     {
-        yield return new WaitForSeconds(special2AnimLength);
-        animator.SetBool("IsWalkingBackwards", false);
-        currentState = BossState.Attack;
+        if (isDead) return;
+        animator.SetBool("IsWalking", wasMovingBeforeAttack);
+        currentState = wasMovingBeforeAttack ? BossState.Aggro : BossState.Idle;
     }
 
     protected void FacePlayer()
@@ -304,18 +310,17 @@ public class BossAI : MonoBehaviour
                 (player.position - firePoint.position).normalized
             );
         }
-        else
-        {
-            Debug.LogError("BossProjectile component missing on projectile!");
-        }
     }
 
-    protected Element GetNextElement() => (Element)(((int)currentElement + 1) % 4);
+    protected Element GetNextElement()
+    {
+        return (Element)(((int)currentElement + 1) % 4);
+    }
 
     protected void ChangeElement(Element newElement)
     {
         currentElement = newElement;
-        currentState = BossState.SpecialAbility1; // Активируем смех
+        currentState = BossState.SpecialAbility1;
         PlayElementChangeSound();
     }
 
@@ -346,6 +351,22 @@ public class BossAI : MonoBehaviour
         agent.isStopped = true;
         foreach (var collider in GetComponents<Collider>())
             collider.enabled = false;
-        Destroy(gameObject, dieAnimLength);
+        Destroy(gameObject, 3f);
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackRadius);
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(transform.position, strongAttackRadius);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, minRangedAttackDistance);
+        Gizmos.DrawWireSphere(transform.position, maxRangedAttackDistance);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectionRadius);
     }
 }
