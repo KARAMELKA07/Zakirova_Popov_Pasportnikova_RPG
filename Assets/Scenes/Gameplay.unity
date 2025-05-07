@@ -1890,19 +1890,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &368450008
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 368450002}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c4f789e27a6f4eb4ab409d8c24f4b2f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHP: 150
 --- !u!136 &368450009
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1917,6 +1904,19 @@ CapsuleCollider:
   m_Height: 1.7
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &368450010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 368450002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd0bef14d0bbef4499c6b9a14284d63e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxHP: 150
 --- !u!1001 &407882661
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12540,6 +12540,9 @@ MonoBehaviour:
     m_Bits: 128
   magicDamage: 20
   magicRange: 30
+  bossTag: Boss
+  bossSwordDamageMultiplier: 2
+  bossMagicDamageMultiplier: 3
 --- !u!1 &3103175225871839976
 GameObject:
   m_ObjectHideFlags: 0

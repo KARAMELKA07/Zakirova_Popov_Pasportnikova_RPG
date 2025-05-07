@@ -18,10 +18,11 @@ public class BossHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        // Отключаем мирный режим при получении урона (если это босс)
+        // Отключаем мирный режим при получении урона
         if (bossAI != null && bossAI.isPeaceful)
         {
             bossAI.isPeaceful = false;
+            Debug.Log("Босс вышел из мирного режима!"); // Добавьте для отладки
         }
 
         currentHP -= damage;
@@ -29,7 +30,6 @@ public class BossHealth : MonoBehaviour
 
         if (currentHP <= 0)
         {
-            currentHP = 0;
             Die();
         }
     }

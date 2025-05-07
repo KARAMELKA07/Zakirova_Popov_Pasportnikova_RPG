@@ -118,7 +118,7 @@ public abstract class BaseEnemyAI : MonoBehaviour
         animator.SetFloat("Speed", agent.velocity.magnitude);
     }
 
-    public virtual void Die()
+    /*public virtual void Die()
     {
         if (isDead) return;
         isDead = true;
@@ -127,6 +127,29 @@ public abstract class BaseEnemyAI : MonoBehaviour
         agent.isStopped = true;
         agent.enabled = false;
 
+        Destroy(gameObject, 3f);
+    }*/
+
+    public virtual void Die()
+    {
+        if (isDead) return;
+        isDead = true;
+
+        // Останавливаем агента
+        if (agent != null)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+
+        // Запускаем анимацию смерти
+        if (animator != null)
+        {
+ 
+            animator.SetTrigger("DieZ");
+        }
+
+        // Уничтожаем объект
         Destroy(gameObject, 3f);
     }
 }
