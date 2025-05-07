@@ -55,6 +55,7 @@ public class BossAI : MonoBehaviour
     protected bool wasMovingBeforeAttack;
     protected Element currentElement;
     protected WeaponType currentWeapon;
+    protected bool isSpecialAbilityPlaying = false;
 
     void Start()
     {
@@ -79,7 +80,7 @@ public class BossAI : MonoBehaviour
     {
         if (isDead) return;
 
-        if (Time.time - lastElementChangeTime >= elementChangeInterval)
+        if (Time.time - lastElementChangeTime >= elementChangeInterval && !isSpecialAbilityPlaying)
         {
             ChangeElement(GetNextElement());
             lastElementChangeTime = Time.time;
@@ -98,6 +99,8 @@ public class BossAI : MonoBehaviour
                 currentState = BossState.Flee;
             return;
         }
+
+        if (isSpecialAbilityPlaying) return;
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
@@ -222,11 +225,15 @@ public class BossAI : MonoBehaviour
 
     protected virtual void SpecialAbility1State()
     {
-        agent.isStopped = true;
-        animator.SetBool("IsWalking", false);
-        animator.SetTrigger("Special1");
-        audioSource.PlayOneShot(laughSound);
-        StartCoroutine(PerformSpecialAbility1());
+        if (!isSpecialAbilityPlaying)
+        {
+            isSpecialAbilityPlaying = true;
+            agent.isStopped = true;
+            animator.SetBool("IsWalking", false);
+            animator.SetTrigger("Special1");
+            audioSource.PlayOneShot(laughSound);
+            StartCoroutine(PerformSpecialAbility1());
+        }
     }
 
     protected virtual void FleeState()
@@ -255,17 +262,14 @@ public class BossAI : MonoBehaviour
 
     protected virtual IEnumerator PerformRangedAttack()
     {
-        // Ждем начала анимации
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.5f); // Ждем начала анимации атаки
         if (isDead) yield break;
 
-        // Проигрываем эффекты и звуки
         PlayElementEffect();
         PlayWeaponSound(false);
         SpawnProjectile();
 
-        // Ждем окончания анимации
-        yield return new WaitForSeconds(1.4f);
+        yield return new WaitForSeconds(1.0f); // Общее время анимации
         ReturnToPreviousState();
     }
 
@@ -286,14 +290,15 @@ public class BossAI : MonoBehaviour
 
     protected virtual IEnumerator PerformSpecialAbility1()
     {
-        // Ждем пока анимация Special1 начнется
-        yield return new WaitForSeconds(0.1f);
+        // Ждем пока анимация начнется
+        yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("Special1"));
 
         // Ждем завершения анимации
-        yield return new WaitForSeconds(2.4f);
+        float animLength = animator.GetCurrentAnimatorStateInfo(0).length;
+        yield return new WaitForSeconds(animLength);
 
-        // Сбрасываем триггер и возвращаемся в Idle
-        animator.ResetTrigger("Special1");
+        // Возвращаемся в обычное состояние
+        isSpecialAbilityPlaying = false;
         currentState = BossState.Idle;
     }
 
