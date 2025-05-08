@@ -45,7 +45,7 @@ public class BossAI : MonoBehaviour
     protected NavMeshAgent agent;
     protected Animator animator;
     protected Transform player;
-    protected MobHealth mobHealth;
+    protected BossHealth bossHealth;
     protected AudioSource audioSource;
     protected PlayerHealth playerHealth;
     protected bool isDead = false;
@@ -61,7 +61,7 @@ public class BossAI : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-        mobHealth = GetComponent<MobHealth>();
+        bossHealth = GetComponent<BossHealth>();
         audioSource = GetComponent<AudioSource>();
 
         player = GameObject.FindGameObjectWithTag("Player").transform;
@@ -95,7 +95,7 @@ public class BossAI : MonoBehaviour
         if (isPeaceful)
         {
             currentState = BossState.Idle;
-            if (mobHealth.GetCurrentHP() <= mobHealth.maxHP * fleeHealthThreshold)
+            if (bossHealth.GetCurrentHP() <= bossHealth.maxHP * fleeHealthThreshold)
                 currentState = BossState.Flee;
             return;
         }
@@ -111,7 +111,7 @@ public class BossAI : MonoBehaviour
             return;
         }
 
-        float healthPercent = (float)mobHealth.GetCurrentHP() / mobHealth.maxHP;
+        float healthPercent = (float)bossHealth.GetCurrentHP() / bossHealth.maxHP;
 
         if (healthPercent <= fleeHealthThreshold)
         {
