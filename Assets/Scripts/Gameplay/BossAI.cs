@@ -321,12 +321,24 @@ public class BossAI : MonoBehaviour
 
     protected virtual IEnumerator PerformSpecialAbility1()
     {
+        Debug.Log("Starting SpecialAbility1 coroutine");
+
         // Ждем пока анимация начнется
-        yield return new WaitUntil(() => animator.GetCurrentAnimatorStateInfo(0).IsName("Special1"));
+        yield return new WaitUntil(() =>
+        {
+            bool isPlaying = animator.GetCurrentAnimatorStateInfo(0).IsName("Special1");
+            Debug.Log($"Waiting for Special1 to start. Currently: {isPlaying}");
+            return isPlaying;
+        });
+
+        Debug.Log("Special1 animation started");
 
         // Ждем завершения анимации
         float animLength = animator.GetCurrentAnimatorStateInfo(0).length;
+        Debug.Log($"Animation length: {animLength} seconds");
         yield return new WaitForSeconds(animLength);
+
+        Debug.Log("Special1 animation finished");
 
         // Возвращаемся в обычное состояние
         isSpecialAbilityPlaying = false;
@@ -373,8 +385,36 @@ public class BossAI : MonoBehaviour
 
     protected void ChangeElement(Element newElement)
     {
+        Debug.Log($"Changing element to {newElement}");
         currentElement = newElement;
-        audioSource.PlayOneShot(laughSound);
+
+        // Проверка наличия компонентов
+        if (!animator)
+        {
+            Debug.LogError("Animator component missing!");
+            return;
+        }
+
+        if (!audioSource)
+        {
+            Debug.LogError("AudioSource component missing!");
+            return;
+        }
+
+        // Проверка звука
+        if (laughSound == null)
+        {
+            Debug.LogError("Laugh sound not assigned!");
+        }
+        else
+        {
+            audioSource.PlayOneShot(laughSound);
+        }
+
+        // Проверка анимации
+        Debug.Log("Triggering Special1 animation");
+        animator.SetTrigger("Special1");
+
         PlayElementChangeSound();
         currentState = BossState.SpecialAbility1;
     }
