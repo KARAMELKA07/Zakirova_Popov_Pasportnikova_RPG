@@ -1763,15 +1763,26 @@ MonoBehaviour:
   meleeDamage: 30
   rangedDamage: 20
   strongAttackDamage: 40
+  rangedAttack: {fileID: 0}
   minRangedAttackDistance: 11
   maxRangedAttackDistance: 20
-  projectilePrefab: {fileID: 0}
-  firePoint: {fileID: 0}
-  elementEffects: []
+  projectilePrefab: {fileID: 1300396634129722944, guid: df9095c3bf6334a4aa3ca9282d48b812, type: 3}
+  firePoint: {fileID: 700767474}
+  elementEffects:
+  - {fileID: 1206498299807332549, guid: af6c1e3f046eecd4d81330aeb285600f, type: 3}
+  - {fileID: 8656522925583198860, guid: e509867be4f82f246a95eca1ee5a2d61, type: 3}
+  - {fileID: 198159274938206214, guid: 9e4577abe56a95f4a91d29a0473cd30c, type: 3}
+  - {fileID: 19800000, guid: 77ec3c4e07a36814fb3169ecef41b50a, type: 3}
   meleeSounds: []
-  rangedSounds: []
+  rangedSounds:
+  - {fileID: 8300000, guid: ede0af53b823aac488d36100bf2b0192, type: 3}
+  - {fileID: 8300000, guid: b45cf01bd6fe4e34188d628bb8a13f21, type: 3}
+  - {fileID: 8300000, guid: cfb266564c6e1274a96fa7572c346513, type: 3}
+  - {fileID: 8300000, guid: 3bcbba963b965514ba992103c1da2af3, type: 3}
   elementChangeSounds: []
   laughSound: {fileID: 8300000, guid: aeb2809dd624ed34c967736d5ef8d83e, type: 3}
+  isDead: 0
+  currentElement: 2
 --- !u!82 &368450006
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1917,6 +1928,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHP: 150
+  peacefulDuration: 2
+--- !u!114 &368450013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 368450002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84f06d407a871ad42b72c26dcc29a86e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minRangedAttackDistance: 15
+  maxRangedAttackDistance: 20
+  rangedAttackCooldown: 3
+  projectilePrefabs: []
+  firePoint: {fileID: 700767474}
 --- !u!1001 &407882661
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4020,6 +4049,11 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -1674268716328342803, guid: 38b797ba6cc77df40a51cd3200365644, type: 3}
+--- !u!4 &700767474 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7034966847549104458, guid: af8d0a12de7b28b41b708ac01461d7f8, type: 3}
+  m_PrefabInstance: {fileID: 497535243}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &717883422
 GameObject:
   m_ObjectHideFlags: 0
@@ -12535,6 +12569,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   swordDamage: 30
   attackRange: 2
+  attackAngle: 90
   enemyLayer:
     serializedVersion: 2
     m_Bits: 128
@@ -12543,6 +12578,7 @@ MonoBehaviour:
   bossTag: Boss
   bossSwordDamageMultiplier: 2
   bossMagicDamageMultiplier: 3
+  bossHitRadius: 3
 --- !u!1 &3103175225871839976
 GameObject:
   m_ObjectHideFlags: 0

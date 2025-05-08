@@ -30,8 +30,10 @@ public class BossAI : MonoBehaviour
     public int strongAttackDamage = 40;
 
     [Header("Ranged Attack Settings")]
+    public BossRangedAttack rangedAttack;
     public float minRangedAttackDistance = 11f;
     public float maxRangedAttackDistance = 20f;
+
 
     [Header("References")]
     public GameObject projectilePrefab;
@@ -48,12 +50,12 @@ public class BossAI : MonoBehaviour
     protected BossHealth bossHealth;
     protected AudioSource audioSource;
     protected PlayerHealth playerHealth;
-    protected bool isDead = false;
+    public bool isDead = false;
     protected float lastAttackTime;
     protected float lastStrongAttackTime;
     protected float lastElementChangeTime;
     protected bool wasMovingBeforeAttack;
-    protected Element currentElement;
+    public Element currentElement;
     protected WeaponType currentWeapon;
     protected bool isSpecialAbilityPlaying = false;
 
@@ -195,10 +197,9 @@ public class BossAI : MonoBehaviour
                 animator.SetTrigger("MeleeAttack");
                 StartCoroutine(PerformMeleeAttack());
             }
-            else if (inRangedRange)
+            else if (rangedAttack != null && rangedAttack.CanPerformRangedAttack())
             {
-                animator.SetTrigger("RangedAttack");
-                StartCoroutine(PerformRangedAttack());
+                rangedAttack.PerformRangedAttack();
             }
         }
     }

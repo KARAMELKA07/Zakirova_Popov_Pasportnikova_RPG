@@ -3,35 +3,27 @@ using UnityEngine;
 public class BossProjectile : MonoBehaviour
 {
     public float speed = 15f;
-    public int damage = 20;
-    private Vector3 flightDirection;
-    private float lifetime = 3f;
-    private PlayerHealth playerHealth;
-    private Element element;
+    public float lifetime = 3f;
 
-    public void Setup(Element element, int damage, Vector3 direction)
-    {
-        this.element = element;
-        this.damage = damage;
-        this.flightDirection = direction;
-    }
+    private int damage;
+    private Element element;
+    private Vector3 direction;
+    private PlayerHealth playerHealth;
 
     void Start()
     {
         Destroy(gameObject, lifetime);
+        playerHealth = GameObject.FindGameObjectWithTag("Player")?.GetComponent<PlayerHealth>();
+    }
 
-        if (!GetComponent<Collider>())
-        {
-            SphereCollider collider = gameObject.AddComponent<SphereCollider>();
-            collider.isTrigger = true;
-            collider.radius = 0.5f;
-        }
+    public void Setup(Element elementType, int projectileDamage, Vector3 moveDirection)
+    {
+        element = elementType;
+        damage = projectileDamage;
+        direction = moveDirection;
 
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
-        if (playerObject != null)
-        {
-            playerHealth = playerObject.GetComponent<PlayerHealth>();
-        }
+        // Здесь можно добавить визуальные эффекты в зависимости от стихии
+        ApplyElementVisuals();
     }
 
     void Update()
@@ -41,43 +33,68 @@ public class BossProjectile : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        transform.position += flightDirection * speed * Time.deltaTime;
+
+        transform.position += direction * speed * Time.deltaTime;
     }
 
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
             if (playerHealth != null)
             {
-                ApplyElementEffect(playerHealth);
                 playerHealth.TakeDamage(damage);
+                ApplyElementEffect(); // Применяем эффект стихии
             }
             Destroy(gameObject);
         }
-        else if (!other.CompareTag("Enemy") && !other.CompareTag("Boss"))
+        else if (!other.CompareTag("Enemy") && !other.isTrigger)
         {
             Destroy(gameObject);
         }
     }
 
-    private void ApplyElementEffect(PlayerHealth player)
+    private void ApplyElementVisuals()
     {
-        // Здесь можно реализовать уникальные эффекты для каждой стихии
+        // Здесь можно изменить цвет/эффекты снаряда в зависимости от стихии
+        ParticleSystem ps = GetComponentInChildren<ParticleSystem>();
+        if (ps != null)
+        {
+            var main = ps.main;
+            switch (element)
+            {
+                case Element.Fire:
+                    main.startColor = new Color(1f, 0.3f, 0f);
+                    break;
+                case Element.Ice:
+                    main.startColor = new Color(0.3f, 0.7f, 1f);
+                    break;
+                case Element.Earth:
+                    main.startColor = new Color(0.5f, 0.3f, 0.1f);
+                    break;
+                case Element.Ether:
+                    main.startColor = new Color(0.8f, 0.1f, 0.8f);
+                    break;
+            }
+        }
+    }
+
+    private void ApplyElementEffect()
+    {
+        // Здесь можно добавить различные эффекты для разных стихий
         switch (element)
         {
             case Element.Fire:
-                // player.ApplyBurnEffect(3f, damage/4);
+                // Эффект горения
                 break;
             case Element.Ice:
-                // player.ApplySlowEffect(2f, 0.5f);
+                // Эффект замедления
                 break;
             case Element.Earth:
-                // player.ApplyStunEffect(1f);
+                // Эффект оглушения
                 break;
             case Element.Ether:
-                // player.ApplyConfusionEffect(2f);
+                // Эффект магического урона
                 break;
         }
     }
