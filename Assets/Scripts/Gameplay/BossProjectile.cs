@@ -2,76 +2,83 @@ using UnityEngine;
 
 public class BossProjectile : MonoBehaviour
 {
-    [Header("Settings")]
     public float speed = 15f;
-    public float lifetime = 3f;
     public int damage = 20;
-    public Element element;
+    private Vector3 flightDirection;
+    private float lifetime = 3f;
+    private PlayerHealth playerHealth;
+    private Element element;
 
-    [Header("Effects")]
-    public ParticleSystem trailEffect;
-    public AudioClip impactSound;
-
-    private Vector3 direction;
-    private AudioSource audioSource;
-
-    private void Start()
+    public void Setup(Element element, int damage, Vector3 direction)
     {
-        audioSource = GetComponent<AudioSource>();
+        this.element = element;
+        this.damage = damage;
+        this.flightDirection = direction;
+    }
+
+    void Start()
+    {
         Destroy(gameObject, lifetime);
-    }
 
-    // Новый метод для настройки снаряда
-    public void Setup(Element elementType, int damageAmount, Vector3 moveDirection)
-    {
-        element = elementType;
-        damage = damageAmount;
-        direction = moveDirection.normalized;
-        ConfigureAppearance();
-    }
-
-    private void Update()
-    {
-        transform.position += direction * speed * Time.deltaTime;
-    }
-
-    private void ConfigureAppearance()
-    {
-        if (trailEffect != null)
+        if (!GetComponent<Collider>())
         {
-            var main = trailEffect.main;
-            switch (element)
-            {
-                case Element.Fire:
-                    main.startColor = new Color(1f, 0.3f, 0f);
-                    break;
-                case Element.Ice:
-                    main.startColor = new Color(0.3f, 0.8f, 1f);
-                    break;
-                case Element.Earth:
-                    main.startColor = new Color(0.5f, 0.3f, 0.1f);
-                    break;
-                case Element.Ether:
-                    main.startColor = new Color(0.7f, 0.1f, 1f);
-                    break;
-            }
+            SphereCollider collider = gameObject.AddComponent<SphereCollider>();
+            collider.isTrigger = true;
+            collider.radius = 0.5f;
+        }
+
+        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        if (playerObject != null)
+        {
+            playerHealth = playerObject.GetComponent<PlayerHealth>();
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    void Update()
+    {
+        if (playerHealth == null || playerHealth.GetCurrentHP() <= 0)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        transform.position += flightDirection * speed * Time.deltaTime;
+    }
+
+    void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            PlayerHealth health = other.GetComponent<PlayerHealth>();
-            if (health != null)
+            PlayerHealth playerHealth = other.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
             {
-                health.TakeDamage(damage);
-                if (impactSound != null && audioSource != null)
-                {
-                    audioSource.PlayOneShot(impactSound);
-                }
+                ApplyElementEffect(playerHealth);
+                playerHealth.TakeDamage(damage);
             }
+            Destroy(gameObject);
         }
-        Destroy(gameObject);
+        else if (!other.CompareTag("Enemy") && !other.CompareTag("Boss"))
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void ApplyElementEffect(PlayerHealth player)
+    {
+        // Здесь можно реализовать уникальные эффекты для каждой стихии
+        switch (element)
+        {
+            case Element.Fire:
+                // player.ApplyBurnEffect(3f, damage/4);
+                break;
+            case Element.Ice:
+                // player.ApplySlowEffect(2f, 0.5f);
+                break;
+            case Element.Earth:
+                // player.ApplyStunEffect(1f);
+                break;
+            case Element.Ether:
+                // player.ApplyConfusionEffect(2f);
+                break;
+        }
     }
 }

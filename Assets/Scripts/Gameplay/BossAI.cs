@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using System.Collections;
 
-public enum BossState { Idle, Aggro, Attack, StrongAttack, SpecialAbility1, Flee }
+public enum BossState { Idle, Aggro, Attack, StrongAttack, SpecialAbility1, Flee, Die }
 public enum Element { Fire, Ice, Earth, Ether }
 public enum WeaponType { Melee, Ranged }
 
@@ -95,9 +95,6 @@ public class BossAI : MonoBehaviour
         if (isPeaceful)
         {
             currentState = BossState.Idle;
-            if (bossHealth.GetCurrentHP() <= bossHealth.maxHP * fleeHealthThreshold)
-                currentState = BossState.Flee;
-            return;
         }
 
         if (isSpecialAbilityPlaying) return;
@@ -147,6 +144,9 @@ public class BossAI : MonoBehaviour
                 break;
             case BossState.Flee:
                 FleeState();
+                break;
+            case BossState.Die:
+                Die();
                 break;
         }
     }
@@ -266,42 +266,42 @@ public class BossAI : MonoBehaviour
     }
 
     protected virtual IEnumerator PerformRangedAttack()
+{
+    yield return new WaitForSeconds(0.5f); // Ждем начала анимации атаки
+    if (isDead) yield break;
+
+    PlayElementEffect();
+    PlayWeaponSound(false);
+    
+    // Измененная часть для стрельбы как у моба
+    if (player != null)
     {
-        yield return new WaitForSeconds(0.5f); // Ждем начала анимации атаки
-        if (isDead) yield break;
-
-        PlayElementEffect();
-        PlayWeaponSound(false);
-
-        // Измененная часть для стрельбы как у моба
-        if (player != null)
+        Vector3 targetPosition = player.position;
+        GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+        MagicProjectile magicScript = projectile.GetComponent<MagicProjectile>();
+        
+        if (magicScript != null)
         {
-            Vector3 targetPosition = player.position;
-            GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
-            MagicProjectile magicScript = projectile.GetComponent<MagicProjectile>();
-
-            if (magicScript != null)
+            magicScript.SetDirection(targetPosition);
+        }
+        else
+        {
+            // Если у снаряда нет MagicProjectile, используем старый метод
+            BossProjectile proj = projectile.GetComponent<BossProjectile>();
+            if (proj != null)
             {
-                magicScript.SetDirection(targetPosition);
-            }
-            else
-            {
-                // Если у снаряда нет MagicProjectile, используем старый метод
-                BossProjectile proj = projectile.GetComponent<BossProjectile>();
-                if (proj != null)
-                {
-                    proj.Setup(
-                        currentElement,
-                        rangedDamage,
-                        (player.position - firePoint.position).normalized
-                    );
-                }
+                proj.Setup(
+                    currentElement,
+                    rangedDamage,
+                    (player.position - firePoint.position).normalized
+                );
             }
         }
-
-        yield return new WaitForSeconds(1.0f); // Общее время анимации
-        ReturnToPreviousState();
     }
+
+    yield return new WaitForSeconds(1.0f); // Общее время анимации
+    ReturnToPreviousState();
+}
 
     protected virtual IEnumerator PerformStrongAttack()
     {
