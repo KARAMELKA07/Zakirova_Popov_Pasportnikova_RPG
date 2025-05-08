@@ -111,13 +111,7 @@ public class BossAI : MonoBehaviour
             return;
         }
 
-        float healthPercent = (float)bossHealth.GetCurrentHP() / bossHealth.maxHP;
-
-        if (healthPercent <= fleeHealthThreshold)
-        {
-            currentState = BossState.Flee;
-        }
-        else if (distanceToPlayer <= strongAttackRadius && Time.time - lastStrongAttackTime >= strongAttackCooldown)
+        if (distanceToPlayer <= strongAttackRadius && Time.time - lastStrongAttackTime >= strongAttackCooldown)
         {
             currentState = BossState.StrongAttack;
         }
@@ -278,7 +272,32 @@ public class BossAI : MonoBehaviour
 
         PlayElementEffect();
         PlayWeaponSound(false);
-        SpawnProjectile();
+
+        // Измененная часть для стрельбы как у моба
+        if (player != null)
+        {
+            Vector3 targetPosition = player.position;
+            GameObject projectile = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
+            MagicProjectile magicScript = projectile.GetComponent<MagicProjectile>();
+
+            if (magicScript != null)
+            {
+                magicScript.SetDirection(targetPosition);
+            }
+            else
+            {
+                // Если у снаряда нет MagicProjectile, используем старый метод
+                BossProjectile proj = projectile.GetComponent<BossProjectile>();
+                if (proj != null)
+                {
+                    proj.Setup(
+                        currentElement,
+                        rangedDamage,
+                        (player.position - firePoint.position).normalized
+                    );
+                }
+            }
+        }
 
         yield return new WaitForSeconds(1.0f); // Общее время анимации
         ReturnToPreviousState();
