@@ -1767,13 +1767,17 @@ MonoBehaviour:
   minRangedAttackDistance: 11
   maxRangedAttackDistance: 20
   projectilePrefab: {fileID: 1300396634129722944, guid: df9095c3bf6334a4aa3ca9282d48b812, type: 3}
-  firePoint: {fileID: 700767474}
+  firePoint: {fileID: 1547174605}
   elementEffects:
   - {fileID: 1206498299807332549, guid: af6c1e3f046eecd4d81330aeb285600f, type: 3}
   - {fileID: 8656522925583198860, guid: e509867be4f82f246a95eca1ee5a2d61, type: 3}
   - {fileID: 198159274938206214, guid: 9e4577abe56a95f4a91d29a0473cd30c, type: 3}
   - {fileID: 19800000, guid: 77ec3c4e07a36814fb3169ecef41b50a, type: 3}
-  meleeSounds: []
+  meleeSounds:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   rangedSounds:
   - {fileID: 8300000, guid: ede0af53b823aac488d36100bf2b0192, type: 3}
   - {fileID: 8300000, guid: b45cf01bd6fe4e34188d628bb8a13f21, type: 3}
@@ -1941,10 +1945,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 84f06d407a871ad42b72c26dcc29a86e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minRangedAttackDistance: 15
+  minRangedAttackDistance: 10
   maxRangedAttackDistance: 20
   rangedAttackCooldown: 3
-  projectilePrefabs: []
+  projectilePrefabs:
+  - {fileID: 1206498299807332555, guid: af6c1e3f046eecd4d81330aeb285600f, type: 3}
+  - {fileID: 8656522925564163052, guid: e509867be4f82f246a95eca1ee5a2d61, type: 3}
+  - {fileID: 1545806602296978, guid: 9e4577abe56a95f4a91d29a0473cd30c, type: 3}
+  - {fileID: 100000, guid: 77ec3c4e07a36814fb3169ecef41b50a, type: 3}
   firePoint: {fileID: 700767474}
 --- !u!1001 &407882661
 PrefabInstance:
@@ -8931,6 +8939,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1517862231}
   m_CullTransparentMesh: 1
+--- !u!4 &1547174605 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4940014057870493256, guid: af8d0a12de7b28b41b708ac01461d7f8, type: 3}
+  m_PrefabInstance: {fileID: 497535243}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1566058827
 GameObject:
   m_ObjectHideFlags: 0
