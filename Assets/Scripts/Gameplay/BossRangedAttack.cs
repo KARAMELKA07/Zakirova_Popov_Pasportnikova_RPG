@@ -71,7 +71,16 @@ public class BossRangedAttack : MonoBehaviour
             return;
         }
 
-        Vector3 direction = (player.position - firePoint.position).normalized;
+        // Получаем позицию груди игрока (примерно на половине высоты)
+        Vector3 playerChestPosition = player.position + Vector3.up * 0.2f; // 1.0f - примерная высота груди
+
+        // Рассчитываем направление с небольшим смещением вверх
+        Vector3 direction = (playerChestPosition - firePoint.position).normalized;
+
+        // Добавляем дополнительное смещение вверх (можно регулировать)
+        direction += Vector3.up * 0.1f; // 0.2f - коэффициент высоты полета
+        direction = direction.normalized; // Нормализуем после добавления смещения
+
         Quaternion rotation = Quaternion.LookRotation(direction);
 
         GameObject projectile = Instantiate(projectilePrefab, firePoint.position, rotation);

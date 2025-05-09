@@ -32,7 +32,7 @@ public class BossAI : MonoBehaviour
     [Header("Ranged Attack Settings")]
     public BossRangedAttack rangedAttack;
     public float minRangedAttackDistance = 10f;
-    public float maxRangedAttackDistance = 20f;
+    public float maxRangedAttackDistance = 15f;
 
 
     [Header("References")]
