@@ -1774,10 +1774,10 @@ MonoBehaviour:
   - {fileID: 198159274938206214, guid: 9e4577abe56a95f4a91d29a0473cd30c, type: 3}
   - {fileID: 19800000, guid: 77ec3c4e07a36814fb3169ecef41b50a, type: 3}
   meleeSounds:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 8300000, guid: 1c669d0655076f348a37f8ff25098a5c, type: 3}
+  - {fileID: 8300000, guid: 675038cdb3ea7bd4599ff7098de45a2a, type: 3}
+  - {fileID: 8300000, guid: 1dbf6622ed73277489c696fce5605341, type: 3}
+  - {fileID: 8300000, guid: f144eedfc13b381458a1dc4aa9386d93, type: 3}
   rangedSounds:
   - {fileID: 8300000, guid: ede0af53b823aac488d36100bf2b0192, type: 3}
   - {fileID: 8300000, guid: b45cf01bd6fe4e34188d628bb8a13f21, type: 3}

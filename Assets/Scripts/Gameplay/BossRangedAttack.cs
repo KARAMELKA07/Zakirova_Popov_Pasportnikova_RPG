@@ -7,8 +7,8 @@ public class BossRangedAttack : MonoBehaviour
     [Header("Ranged Attack Settings")]
     public float minRangedAttackDistance = 15f;
     public float maxRangedAttackDistance = 20f;
-    public float rangedAttackCooldown = 3f;
-    public GameObject[] projectilePrefabs; // 4 префаба для разных стихий
+    public float rangedAttackCooldown = 7f;
+    public GameObject[] projectilePrefabs; 
     public Transform firePoint;
 
     private BossAI bossAI;
