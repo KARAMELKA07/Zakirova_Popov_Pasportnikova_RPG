@@ -71,15 +71,12 @@ public class BossRangedAttack : MonoBehaviour
             return;
         }
 
-        // Получаем позицию груди игрока (примерно на половине высоты)
-        Vector3 playerChestPosition = player.position + Vector3.up * 0.2f; // 1.0f - примерная высота груди
+        Vector3 playerChestPosition = player.position + Vector3.up * 0.2f; 
 
-        // Рассчитываем направление с небольшим смещением вверх
         Vector3 direction = (playerChestPosition - firePoint.position).normalized;
 
-        // Добавляем дополнительное смещение вверх (можно регулировать)
-        direction += Vector3.up * 0.1f; // 0.2f - коэффициент высоты полета
-        direction = direction.normalized; // Нормализуем после добавления смещения
+        direction += Vector3.up * 0.05f; 
+        direction = direction.normalized; 
 
         Quaternion rotation = Quaternion.LookRotation(direction);
 
@@ -107,9 +104,25 @@ public class BossRangedAttack : MonoBehaviour
 
     private void PlayAttackSound()
     {
-        if (bossAI.rangedSounds.Length > 0)
+        // Получаем индекс текущего элемента
+        int elementIndex = (int)bossAI.currentElement;
+
+        // Проверяем, что есть звуки для этого элемента
+        if (bossAI.rangedSounds != null && bossAI.rangedSounds.Length > elementIndex)
         {
-            audioSource.PlayOneShot(bossAI.rangedSounds[Random.Range(0, bossAI.rangedSounds.Length)]);
+            AudioClip elementSound = bossAI.rangedSounds[elementIndex];
+            if (elementSound != null)
+            {
+                audioSource.PlayOneShot(elementSound);
+            }
+            else
+            {
+                Debug.LogWarning($"No ranged sound for element {bossAI.currentElement}");
+            }
+        }
+        else
+        {
+            Debug.LogError("Ranged sounds array is not properly configured for all elements");
         }
     }
 }
