@@ -1750,7 +1750,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
-  isPeaceful: 0
+  isPeaceful: 1
   elementChangeInterval: 15
   normalSpeed: 3.5
   chaseSpeed: 2

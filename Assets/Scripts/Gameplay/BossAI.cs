@@ -98,31 +98,35 @@ public class BossAI : MonoBehaviour
         {
             currentState = BossState.Idle;
         }
-
-        if (isSpecialAbilityPlaying) return;
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        if (distanceToPlayer > detectionRadius)
+        else 
         {
-            currentState = BossState.Idle;
-            agent.speed = normalSpeed;
-            return;
+            if (isSpecialAbilityPlaying) return;
+
+            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+            if (distanceToPlayer > detectionRadius)
+            {
+                currentState = BossState.Idle;
+                agent.speed = normalSpeed;
+                return;
+            }
+
+            if (distanceToPlayer <= strongAttackRadius && Time.time - lastStrongAttackTime >= strongAttackCooldown)
+            {
+                currentState = BossState.StrongAttack;
+            }
+            else if (distanceToPlayer <= attackRadius)
+            {
+                currentState = BossState.Attack;
+            }
+            else
+            {
+                currentState = BossState.Aggro;
+                agent.speed = chaseSpeed;
+            }
         }
 
-        if (distanceToPlayer <= strongAttackRadius && Time.time - lastStrongAttackTime >= strongAttackCooldown)
-        {
-            currentState = BossState.StrongAttack;
-        }
-        else if (distanceToPlayer <= attackRadius)
-        {
-            currentState = BossState.Attack;
-        }
-        else
-        {
-            currentState = BossState.Aggro;
-            agent.speed = chaseSpeed;
-        }
+        
     }
 
     protected virtual void ExecuteState()
