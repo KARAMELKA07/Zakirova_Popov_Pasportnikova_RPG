@@ -31,7 +31,7 @@ public class BossAI : MonoBehaviour
 
     [Header("Ranged Attack Settings")]
     public BossRangedAttack rangedAttack;
-    public float minRangedAttackDistance = 11f;
+    public float minRangedAttackDistance = 10f;
     public float maxRangedAttackDistance = 20f;
 
 
@@ -104,14 +104,18 @@ public class BossAI : MonoBehaviour
 
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-            if (distanceToPlayer > detectionRadius)
+            if (distanceToPlayer > maxRangedAttackDistance  )
             {
                 currentState = BossState.Idle;
                 agent.speed = normalSpeed;
                 return;
             }
 
-            if (distanceToPlayer <= strongAttackRadius && Time.time - lastStrongAttackTime >= strongAttackCooldown)
+            if (distanceToPlayer <= maxRangedAttackDistance && distanceToPlayer > detectionRadius)
+            {
+                currentState = BossState.Attack;
+            }
+            else if (distanceToPlayer <= strongAttackRadius && Time.time - lastStrongAttackTime >= strongAttackCooldown)
             {
                 currentState = BossState.StrongAttack;
             }
@@ -180,11 +184,15 @@ public class BossAI : MonoBehaviour
     {
         float distance = Vector3.Distance(transform.position, player.position);
         bool inRangedRange = distance >= minRangedAttackDistance && distance <= maxRangedAttackDistance;
+        currentWeapon = inRangedRange ? WeaponType.Ranged : WeaponType.Melee;
 
         if (currentWeapon == WeaponType.Ranged && !inRangedRange)
         {
             currentState = BossState.Aggro;
             return;
+        }
+        else if (rangedAttack != null && rangedAttack.CanPerformRangedAttack()){
+            rangedAttack.PerformRangedAttack();
         }
 
         wasMovingBeforeAttack = animator.GetBool("IsWalking");
@@ -200,10 +208,6 @@ public class BossAI : MonoBehaviour
             {
                 animator.SetTrigger("MeleeAttack");
                 StartCoroutine(PerformMeleeAttack());
-            }
-            else if (rangedAttack != null && rangedAttack.CanPerformRangedAttack())
-            {
-                rangedAttack.PerformRangedAttack();
             }
         }
     }

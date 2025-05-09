@@ -1763,7 +1763,7 @@ MonoBehaviour:
   meleeDamage: 30
   rangedDamage: 20
   strongAttackDamage: 40
-  rangedAttack: {fileID: 0}
+  rangedAttack: {fileID: 368450013}
   minRangedAttackDistance: 11
   maxRangedAttackDistance: 20
   projectilePrefab: {fileID: 1300396634129722944, guid: df9095c3bf6334a4aa3ca9282d48b812, type: 3}
