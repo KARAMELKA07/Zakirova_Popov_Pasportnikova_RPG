@@ -6,13 +6,18 @@ public class MobManager : MonoBehaviour
     public static MobManager Instance { get; private set; }
 
     private List<GameObject> activeMobs = new List<GameObject>();
+    private int killCount = 0;
+    private bool bossSpawned = false;
+    private bool victoryMusicPlayed = false;
+
+    public GameObject bossSpawner;
+    public int killsToSpawnBoss = 3;
+    public int killsToVictoryMusic = 5;
 
     void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
-        }
     }
 
     public void RegisterMob(GameObject mob)
@@ -24,10 +29,42 @@ public class MobManager : MonoBehaviour
     {
         activeMobs.Remove(mob);
         Destroy(mob, 3f);
+
+        killCount++;
+        Debug.Log($"Убито мобов: {killCount}");
+
+        if (killCount == killsToSpawnBoss && !bossSpawned)
+        {
+            SpawnBoss();
+        }
+
+        if (killCount == killsToVictoryMusic && !victoryMusicPlayed)
+        {
+            PlayVictoryMusic();
+        }
+
     }
 
-    public int GetMobCount()
+    public int GetMobCount() => activeMobs.Count;
+
+    private void SpawnBoss()
     {
-        return activeMobs.Count;
+        if (bossSpawner != null)
+        {
+            bossSpawner.SetActive(true);
+            bossSpawned = true;
+            Debug.Log("Босс заспавнен!");
+        }
+        else
+        {
+            Debug.LogWarning("BossSpawner не назначен в MobManager!");
+        }
+    }
+
+    private void PlayVictoryMusic()
+    {
+        GameBootstrapper.Instance.AudioService.PlayMusic("victory");
+        victoryMusicPlayed = true;
+        Debug.Log("Победная музыка играет!");
     }
 }
