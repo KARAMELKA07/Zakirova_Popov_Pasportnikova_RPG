@@ -42,6 +42,7 @@ public class MobManager : MonoBehaviour
         {
             PlayVictoryMusic();
         }
+        ScoreUI.Instance?.UpdateScore(killCount);
 
     }
 
