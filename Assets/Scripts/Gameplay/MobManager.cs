@@ -14,6 +14,9 @@ public class MobManager : MonoBehaviour
     public int killsToSpawnBoss = 3;
     public int killsToVictoryMusic = 5;
 
+    public GameObject gamePlayerUI;
+    public GameObject gameWin;
+
     void Awake()
     {
         if (Instance == null)
@@ -67,5 +70,14 @@ public class MobManager : MonoBehaviour
         GameBootstrapper.Instance.AudioService.PlayMusic("victory");
         victoryMusicPlayed = true;
         Debug.Log("Победная музыка играет!");
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject enemy in enemies)
+        {
+            Destroy(enemy);
+        }
+        gamePlayerUI.SetActive(false);
+        gameWin.SetActive(true);
+        Time.timeScale = 0f;
+
     }
 }

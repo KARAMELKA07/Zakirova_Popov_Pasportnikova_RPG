@@ -6,11 +6,11 @@ public class RangedEnemyAI : BaseEnemyAI
     [System.Serializable]
     public class WeaponSettings
     {
-        public GameObject persistentWeapon; 
-        public GameObject projectilePrefab; 
-        public float cooldown = 3f;
+        public GameObject persistentWeapon;
+        public GameObject projectilePrefab;
+        public float cooldown = 10f;
         public float attackDelay = 0.5f;
-        public int damage = 25; 
+        public int damage = 25;
         [Range(0f, 1f)] public float spawnChance = 0.5f;
     }
 
@@ -115,20 +115,14 @@ public class RangedEnemyAI : BaseEnemyAI
     {
         if (isDead || player == null) return;
 
-        if (currentWeapon == orbSettings)
-        {
-            InstantiateProjectile();
-        }
-        else
-        {
-            ApplyStaffDamage();
-        }
+        InstantiateProjectile(); // Теперь оба оружия используют снаряды
     }
 
     private void InstantiateProjectile()
     {
         if (currentWeapon.projectilePrefab == null || projectileSpawnPoint == null)
         {
+            Debug.LogWarning("Не задан projectilePrefab или projectileSpawnPoint для текущего оружия!");
             return;
         }
 
@@ -147,14 +141,6 @@ public class RangedEnemyAI : BaseEnemyAI
 
     private void ApplyStaffDamage()
     {
-        if (player == null || playerHealth == null || currentWeapon == null)
-        {
-            return;
-        }
-
-        if (Vector3.Distance(transform.position, player.position) <= attackRadius)
-        {
-            playerHealth.TakeDamage(currentWeapon.damage);
-        }
+        InstantiateProjectile(); // Перенаправляем на выпуск снаряда
     }
 }

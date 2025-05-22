@@ -2582,15 +2582,15 @@ MonoBehaviour:
   projectileSpawnPoint: {fileID: 9138458676140662591}
   staffSettings:
     persistentWeapon: {fileID: 2973761918742748294, guid: d4629a4656270bc4a821f2cf33070a21, type: 3}
-    projectilePrefab: {fileID: 1300396634129722944, guid: 3c1d580a3fbe271408df0688c947d4da, type: 3}
-    cooldown: 3
+    projectilePrefab: {fileID: 1300396634129722944, guid: b263331cc2633354484fffccad19ee81, type: 3}
+    cooldown: 10
     attackDelay: 0.5
     damage: 25
     spawnChance: 0.5
   orbSettings:
     persistentWeapon: {fileID: 2973761918742748294, guid: d4629a4656270bc4a821f2cf33070a21, type: 3}
     projectilePrefab: {fileID: 1300396634129722944, guid: 3c1d580a3fbe271408df0688c947d4da, type: 3}
-    cooldown: 3
+    cooldown: 10
     attackDelay: 0.5
     damage: 25
     spawnChance: 0.5
