@@ -9,14 +9,17 @@ public class PlayerHealth : MonoBehaviour
     private int currentHP;
     private Animator animator;
 
-    public GameObject gameOverPanel; 
+    public GameObject gameOverPanel;
+    public GameObject gamePlayerUI;
     public Text gameOverText;
 
     void Start()
     {
         currentHP = maxHP;
-        gameOverPanel.SetActive(false); 
+        gameOverPanel.SetActive(false);
+        gamePlayerUI.SetActive(true);
         animator = GetComponent<Animator>();
+        Time.timeScale = 1f;
     }
 
     public int GetCurrentHP()
@@ -51,11 +54,23 @@ public class PlayerHealth : MonoBehaviour
     void Die()
     {
         Debug.Log("Игрок умер.");
+        gamePlayerUI.SetActive(false);
+        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject enemy in enemies)
+        {
+            Destroy(enemy);
+        }
+        StartCoroutine(DieWithDelay(2f)); 
+    }
 
+    private IEnumerator DieWithDelay(float delay)
+    {
+        yield return new WaitForSecondsRealtime(delay); 
         gameOverPanel.SetActive(true);
         gameOverText.text = "Game Over!";
+        Time.timeScale = 0f;
     }
-    
+
     public void ForceSetHP(int hp)
     {
         currentHP = Mathf.Clamp(hp, 0, maxHP);

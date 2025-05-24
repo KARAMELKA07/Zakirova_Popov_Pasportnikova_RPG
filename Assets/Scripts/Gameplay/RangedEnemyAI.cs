@@ -1,98 +1,146 @@
 using UnityEngine;
-using UnityEngine.AI;
+using System.Collections;
 
-public class RangedEnemyAI : MonoBehaviour
+public class RangedEnemyAI : BaseEnemyAI
 {
-    public float detectionRadius = 15f;
-    public float attackRadius = 10f;
-    public float retreatDistance = 5f;
-    public float attackCooldown = 3f;
-    public GameObject magicProjectilePrefab;
-    public Transform firePoint;
+    [System.Serializable]
+    public class WeaponSettings
+    {
+        public GameObject persistentWeapon;
+        public GameObject projectilePrefab;
+        public float cooldown = 10f;
+        public float attackDelay = 0.5f;
+        public int damage = 25;
+        [Range(0f, 1f)] public float spawnChance = 0.5f;
+    }
 
-    private NavMeshAgent agent;
-    private Transform player;
-    private Animator animator;
+    [Header("Weapon Settings")]
+    [SerializeField] private Transform weaponParent;
+    [SerializeField] private Transform projectileSpawnPoint;
+    [SerializeField] private WeaponSettings staffSettings;
+    [SerializeField] private WeaponSettings orbSettings;
+
+    [Header("Combat Settings")]
+    [SerializeField] private float retreatDistance = 5f;
+
+    private WeaponSettings currentWeapon;
     private float lastAttackTime;
-    private bool isDead = false;
+    private GameObject currentWeaponInstance;
+    private PlayerHealth playerHealth;
 
-    void Start()
+    protected override void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
-        animator = GetComponent<Animator>();
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        base.Start();
+
+        if (player == null)
+        {
+            Debug.LogError("Player не найден!");
+            return;
+        }
+
+        playerHealth = player.GetComponent<PlayerHealth>();
+        if (playerHealth == null)
+        {
+            Debug.LogError("PlayerHealth не найден на игроке!");
+            return;
+        }
+
+        EquipRandomWeapon();
     }
 
-    void Update()
+    private void EquipRandomWeapon()
     {
-        if (isDead) return; 
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        animator.SetFloat("Speed", agent.velocity.magnitude);
-
-        if (distanceToPlayer <= attackRadius)
+        if (staffSettings == null || orbSettings == null)
         {
-            AttackPlayer();
-            if (distanceToPlayer < retreatDistance)
-            {
-                Vector3 dirToPlayer = transform.position - player.position;
-                Vector3 retreatPos = transform.position + dirToPlayer.normalized * 2f;
-                agent.SetDestination(retreatPos);
-            }
-            else
-            {
-                agent.SetDestination(transform.position);
-            }
+            Debug.LogError("Настройки оружия не назначены!");
+            return;
         }
-        else if (distanceToPlayer <= detectionRadius)
+
+        currentWeapon = Random.value <= 0.5f ? staffSettings : orbSettings;
+
+        // Для посоха
+        if (currentWeapon == staffSettings && currentWeapon.persistentWeapon != null && weaponParent != null)
         {
-            agent.SetDestination(player.position);
+            if (currentWeaponInstance != null)
+            {
+                Destroy(currentWeaponInstance);
+            }
+            currentWeaponInstance = Instantiate(
+                currentWeapon.persistentWeapon,
+                weaponParent.position,
+                weaponParent.rotation,
+                weaponParent
+            );
         }
     }
 
-    void AttackPlayer()
+    protected override void AttackState()
     {
-        if (isDead || Time.time - lastAttackTime < attackCooldown || player == null) return;
+        if (player == null) return;
 
-        lastAttackTime = Time.time;
-        agent.SetDestination(transform.position); 
+        if (Vector3.Distance(transform.position, player.position) < retreatDistance)
+        {
+            FleeState();
+            return;
+        }
+
+        agent.isStopped = true;
+        animator.SetFloat("Speed", 0);
+
+        if (Time.time - lastAttackTime >= currentWeapon.cooldown)
+        {
+            lastAttackTime = Time.time;
+            FacePlayer();
+            animator.SetTrigger("attack");
+            StartCoroutine(PerformAttackWithDelay());
+        }
+    }
+
+    private void FacePlayer()
+    {
+        if (player == null) return;
 
         Vector3 direction = (player.position - transform.position).normalized;
-        direction.y = 0; 
+        direction.y = 0;
         transform.rotation = Quaternion.LookRotation(direction);
-
-        animator.SetTrigger("attack"); 
-
-        Invoke("Shoot", 0.5f); 
     }
 
-    void Shoot()
+    private IEnumerator PerformAttackWithDelay()
+    {
+        yield return new WaitForSeconds(currentWeapon.attackDelay);
+        PerformAttack();
+    }
+
+    private void PerformAttack()
     {
         if (isDead || player == null) return;
 
-        Vector3 targetPosition = player.position;
-        GameObject projectile = Instantiate(magicProjectilePrefab, firePoint.position, Quaternion.identity);
-        MagicProjectile magicScript = projectile.GetComponent<MagicProjectile>();
+        InstantiateProjectile(); // Теперь оба оружия используют снаряды
+    }
 
-        if (magicScript != null)
+    private void InstantiateProjectile()
+    {
+        if (currentWeapon.projectilePrefab == null || projectileSpawnPoint == null)
         {
-            magicScript.SetDirection(targetPosition);
+            Debug.LogWarning("Не задан projectilePrefab или projectileSpawnPoint для текущего оружия!");
+            return;
         }
-        else
+
+        GameObject projectile = Instantiate(
+            currentWeapon.projectilePrefab,
+            projectileSpawnPoint.position,
+            Quaternion.identity
+        );
+
+        if (projectile.TryGetComponent<MagicProjectile>(out var magicScript))
         {
-            Debug.LogError("У снаряда отсутствует компонент MagicProjectile!");
+            Vector3 target = player != null ? player.position + Vector3.up : transform.forward;
+            magicScript.SetDirection(target);
         }
     }
 
-    public void Die()
+    private void ApplyStaffDamage()
     {
-        if (isDead) return;
-
-        isDead = true;
-        Debug.Log($"{gameObject.name} умер.");
-        animator.SetTrigger("die"); 
-        agent.isStopped = true; 
-        agent.enabled = false; 
-        Destroy(gameObject, 3f); 
+        InstantiateProjectile(); // Перенаправляем на выпуск снаряда
     }
 }

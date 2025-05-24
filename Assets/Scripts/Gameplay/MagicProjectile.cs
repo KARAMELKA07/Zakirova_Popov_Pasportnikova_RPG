@@ -57,7 +57,7 @@ public class MagicProjectile : MonoBehaviour
             Destroy(gameObject);
         }
 
-        if (!other.CompareTag("Enemy")) 
+        if (other.CompareTag("Castle")) 
         {
             Destroy(gameObject);
         }

@@ -1,116 +1,80 @@
 using UnityEngine;
-using UnityEngine.AI;
 using System.Collections;
 
-public class MeleeEnemyAI : MonoBehaviour
+public class MeleeEnemyAI : BaseEnemyAI
 {
-    public float detectionRadius = 10f;
-    public float attackRadius = 3f;
-    public float forgetRadius = 15f;
-    public float attackCooldown = 2f;
-    public float attackDelay = 0.5f;
-    public int attackDamage = 35;
+    [System.Serializable]
+    public class WeaponSettings
+    {
+        public GameObject weaponPrefab;
+        public int damage = 35;
+        public float cooldown = 2f;
+        public float attackDelay = 0.5f;
+        [Range(0f, 1f)] public float spawnChance = 0.5f;
+    }
 
-    private NavMeshAgent agent;
-    private Transform player;
-    private Animator animator;
-    private float lastAttackTime = 0;
-    private bool isDead = false;
+    [Header("Weapon Settings")]
+    [SerializeField] private Transform weaponParent;
+    [SerializeField] private WeaponSettings axeSettings;
+    [SerializeField] private WeaponSettings knifeSettings;
+
+    private WeaponSettings currentWeapon;
+    private float lastAttackTime;
     private PlayerHealth playerHealth;
+    private GameObject currentWeaponInstance;
 
-    void Start()
+    protected override void Start()
     {
-        agent = GetComponent<NavMeshAgent>();
-        animator = GetComponent<Animator>();
-        GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
+        base.Start();
+        playerHealth = player.GetComponent<PlayerHealth>();
+        EquipRandomWeapon();
+    }
 
-        if (playerObject != null)
+    private void EquipRandomWeapon()
+    {
+        float random = Random.value;
+        currentWeapon = random <= axeSettings.spawnChance ? axeSettings : knifeSettings;
+
+        if (currentWeapon.weaponPrefab && weaponParent)
         {
-            player = playerObject.transform;
-            playerHealth = playerObject.GetComponent<PlayerHealth>();
+            currentWeaponInstance = Instantiate(
+                currentWeapon.weaponPrefab,
+                weaponParent.position,
+                weaponParent.rotation,
+                weaponParent
+            );
         }
     }
 
-    void Update()
+    protected override void AttackState()
     {
-        if (isDead) return; 
-        if (playerHealth == null || playerHealth.GetCurrentHP() <= 0)
-        {
-            StopChasing();
-            animator.SetFloat("Speed", 0);
-            return; 
-        }
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        if (distanceToPlayer <= attackRadius)
-        {
-            AttackPlayer();
-        }
-        else if (distanceToPlayer <= detectionRadius)
-        {
-            ChasePlayer();
-        }
-        else if (distanceToPlayer > forgetRadius)
-        {
-            StopChasing();
-        }
-
-        float speed = agent.desiredVelocity.magnitude;
-        animator.SetFloat("Speed", speed);
-    }
-
-    void ChasePlayer()
-    {
-        if (isDead) return;
-        agent.isStopped = false;
-        agent.SetDestination(player.position);
-    }
-
-    void StopChasing()
-    {
-        if (isDead) return;
         agent.isStopped = true;
-    }
+        animator.SetFloat("Speed", 0);
 
-    void AttackPlayer()
-    {
-        if (isDead) return;
-
-        if (Time.time - lastAttackTime >= attackCooldown && player.GetComponent<PlayerHealth>().GetCurrentHP() > 0)
+        if (Time.time - lastAttackTime >= currentWeapon.cooldown)
         {
             lastAttackTime = Time.time;
+
             Vector3 direction = (player.position - transform.position).normalized;
-            direction.y = 0; 
+            direction.y = 0;
             transform.rotation = Quaternion.LookRotation(direction);
-            animator.SetTrigger("attack"); 
+
+            animator.SetTrigger("attack");
             StartCoroutine(PerformAttack());
         }
     }
 
     private IEnumerator PerformAttack()
     {
-        yield return new WaitForSeconds(attackDelay);
+        yield return new WaitForSeconds(currentWeapon.attackDelay);
 
-        if (isDead) yield break; 
+        if (isDead) yield break;
 
         if (player != null && Vector3.Distance(transform.position, player.position) <= attackRadius)
         {
-            player.GetComponent<PlayerHealth>().TakeDamage(attackDamage);
+            playerHealth.TakeDamage(currentWeapon.damage);
         }
     }
 
-    public void Die()
-    {
-        if (isDead) return;
-        isDead = true;
-
-        GetComponent<NavMeshAgent>().enabled = false;
-        animator.SetTrigger("Die"); 
-
-        Destroy(gameObject, 3f); 
-    }
-
-    
 
 }
