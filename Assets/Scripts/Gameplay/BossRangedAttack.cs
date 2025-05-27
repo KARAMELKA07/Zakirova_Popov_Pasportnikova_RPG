@@ -7,8 +7,8 @@ public class BossRangedAttack : MonoBehaviour
     [Header("Ranged Attack Settings")]
     public float minRangedAttackDistance = 15f;
     public float maxRangedAttackDistance = 20f;
-    public float rangedAttackCooldown = 3f;
-    public GameObject[] projectilePrefabs; // 4 префаба для разных стихий
+    public float rangedAttackCooldown = 7f;
+    public GameObject[] projectilePrefabs; 
     public Transform firePoint;
 
     private BossAI bossAI;
@@ -71,7 +71,13 @@ public class BossRangedAttack : MonoBehaviour
             return;
         }
 
-        Vector3 direction = (player.position - firePoint.position).normalized;
+        Vector3 playerChestPosition = player.position + Vector3.up * 0.2f; 
+
+        Vector3 direction = (playerChestPosition - firePoint.position).normalized;
+
+        direction += Vector3.up * 0.05f; 
+        direction = direction.normalized; 
+
         Quaternion rotation = Quaternion.LookRotation(direction);
 
         GameObject projectile = Instantiate(projectilePrefab, firePoint.position, rotation);
@@ -98,9 +104,25 @@ public class BossRangedAttack : MonoBehaviour
 
     private void PlayAttackSound()
     {
-        if (bossAI.rangedSounds.Length > 0)
+        // Получаем индекс текущего элемента
+        int elementIndex = (int)bossAI.currentElement;
+
+        // Проверяем, что есть звуки для этого элемента
+        if (bossAI.rangedSounds != null && bossAI.rangedSounds.Length > elementIndex)
         {
-            audioSource.PlayOneShot(bossAI.rangedSounds[Random.Range(0, bossAI.rangedSounds.Length)]);
+            AudioClip elementSound = bossAI.rangedSounds[elementIndex];
+            if (elementSound != null)
+            {
+                audioSource.PlayOneShot(elementSound);
+            }
+            else
+            {
+                Debug.LogWarning($"No ranged sound for element {bossAI.currentElement}");
+            }
+        }
+        else
+        {
+            Debug.LogError("Ranged sounds array is not properly configured for all elements");
         }
     }
 }

@@ -31,8 +31,8 @@ public class BossAI : MonoBehaviour
 
     [Header("Ranged Attack Settings")]
     public BossRangedAttack rangedAttack;
-    public float minRangedAttackDistance = 11f;
-    public float maxRangedAttackDistance = 20f;
+    public float minRangedAttackDistance = 10f;
+    public float maxRangedAttackDistance = 15f;
 
 
     [Header("References")]
@@ -98,31 +98,39 @@ public class BossAI : MonoBehaviour
         {
             currentState = BossState.Idle;
         }
-
-        if (isSpecialAbilityPlaying) return;
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        if (distanceToPlayer > detectionRadius)
+        else 
         {
-            currentState = BossState.Idle;
-            agent.speed = normalSpeed;
-            return;
+            if (isSpecialAbilityPlaying) return;
+
+            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+            if (distanceToPlayer > maxRangedAttackDistance  )
+            {
+                currentState = BossState.Idle;
+                agent.speed = normalSpeed;
+                return;
+            }
+
+            if (distanceToPlayer <= maxRangedAttackDistance && distanceToPlayer > detectionRadius)
+            {
+                currentState = BossState.Attack;
+            }
+            else if (distanceToPlayer <= strongAttackRadius && Time.time - lastStrongAttackTime >= strongAttackCooldown)
+            {
+                currentState = BossState.StrongAttack;
+            }
+            else if (distanceToPlayer <= attackRadius)
+            {
+                currentState = BossState.Attack;
+            }
+            else
+            {
+                currentState = BossState.Aggro;
+                agent.speed = chaseSpeed;
+            }
         }
 
-        if (distanceToPlayer <= strongAttackRadius && Time.time - lastStrongAttackTime >= strongAttackCooldown)
-        {
-            currentState = BossState.StrongAttack;
-        }
-        else if (distanceToPlayer <= attackRadius)
-        {
-            currentState = BossState.Attack;
-        }
-        else
-        {
-            currentState = BossState.Aggro;
-            agent.speed = chaseSpeed;
-        }
+        
     }
 
     protected virtual void ExecuteState()
@@ -176,11 +184,15 @@ public class BossAI : MonoBehaviour
     {
         float distance = Vector3.Distance(transform.position, player.position);
         bool inRangedRange = distance >= minRangedAttackDistance && distance <= maxRangedAttackDistance;
+        currentWeapon = inRangedRange ? WeaponType.Ranged : WeaponType.Melee;
 
         if (currentWeapon == WeaponType.Ranged && !inRangedRange)
         {
             currentState = BossState.Aggro;
             return;
+        }
+        else if (rangedAttack != null && rangedAttack.CanPerformRangedAttack()){
+            rangedAttack.PerformRangedAttack();
         }
 
         wasMovingBeforeAttack = animator.GetBool("IsWalking");
@@ -196,10 +208,6 @@ public class BossAI : MonoBehaviour
             {
                 animator.SetTrigger("MeleeAttack");
                 StartCoroutine(PerformMeleeAttack());
-            }
-            else if (rangedAttack != null && rangedAttack.CanPerformRangedAttack())
-            {
-                rangedAttack.PerformRangedAttack();
             }
         }
     }

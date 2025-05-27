@@ -254,6 +254,37 @@ Transform:
   m_Father: {fileID: 5511356788544303203}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &516192017470685103
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4834658588553072853}
+  m_Layer: 7
+  m_Name: weaponParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4834658588553072853
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 516192017470685103}
+  m_LocalRotation: {x: 0.5598122, y: -0.79273665, z: -0.21087463, w: -0.11709354}
+  m_LocalPosition: {x: -0.0812, y: 0.1174, z: 0.0403}
+  m_LocalScale: {x: 1.1528441, y: 1.1528438, z: 1.1528438}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3881188838065186625}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: -27.739, y: 183.268, z: -71.265}
 --- !u!1 &548238327386142669
 GameObject:
   m_ObjectHideFlags: 0
@@ -382,6 +413,7 @@ Transform:
   - {fileID: 4389711647501406433}
   - {fileID: 5973209996312379269}
   - {fileID: 6436626080343510135}
+  - {fileID: 4834658588553072853}
   m_Father: {fileID: 1151288233626021153}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2299,6 +2331,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
@@ -2968,12 +3001,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58f65b84069f18c48acb01c47689a37b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentState: 0
+  isPeaceful: 0
   detectionRadius: 10
   attackRadius: 1.5
-  forgetRadius: 15
-  attackCooldown: 3
-  attackDelay: 0.5
-  attackDamage: 35
+  fleeHealthThreshold: 0.3
+  weaponParent: {fileID: 4834658588553072853}
+  axeSettings:
+    weaponPrefab: {fileID: 8505162587774318391, guid: 71a20b55145bb504daec65f53cf962a7, type: 3}
+    damage: 40
+    cooldown: 2
+    attackDelay: 0.5
+    spawnChance: 0.5
+  knifeSettings:
+    weaponPrefab: {fileID: 5652302039501635697, guid: e6e239ed4ef861e48ba5f1caa3647e82, type: 3}
+    damage: 30
+    cooldown: 2
+    attackDelay: 0.5
+    spawnChance: 0.5
 --- !u!195 &4268837838033775057
 NavMeshAgent:
   m_ObjectHideFlags: 0
